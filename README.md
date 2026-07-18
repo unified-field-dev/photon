@@ -10,7 +10,7 @@
 The crates.io package is **`uf-photon`** (`photon` is taken). With `[lib] name = "photon"`, imports stay `use photon::…`:
 
 ```toml
-photon = { package = "uf-photon", version = "0.1.0", features = ["runtime", "mem"] }
+photon = { package = "uf-photon", version = "0.1.1", features = ["runtime", "mem"] }
 # or: cargo add uf-photon --features runtime,mem
 ```
 
@@ -53,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
 
 ## About Photon
 
-Photon is a Rust pub/sub runtime with typed topics and durable subscriptions. Storage is pluggable via [`StoragePort`](photon-backend/src/storage/port.rs). Built-in adapters: `mem`, `sqlite`, `nats`, `fluvio`, `kafka`, wired through [`GenericPhotonBackend`](photon-backend/src/backend/generic.rs). Architecture: [docs.rs `photon`](https://docs.rs/uf-photon/latest/photon/#architecture).
+Photon is a Rust pub/sub runtime with typed topics and durable subscriptions. Storage is pluggable via [`StoragePort`](photon-backend/src/storage/port.rs). Built-in adapters: `mem`, `sqlite`, `nats`, `fluvio`, `kafka`, wired through [`GenericPhotonBackend`](photon-backend/src/backend/generic.rs). Primary guide: [Getting started](https://docs.rs/uf-photon/latest/photon/#getting-started) (embedded vs brokered topologies).
 
 ## Performance
 
@@ -128,15 +128,16 @@ Photon::builder()
     .build()?;
 ```
 
-See [docs.rs `photon::config`](https://docs.rs/uf-photon/latest/photon/config/) and [architecture](https://docs.rs/uf-photon/latest/photon/#architecture).
+See [Getting started](https://docs.rs/uf-photon/latest/photon/#getting-started) (Mode 1 embedded vs Mode 2 brokered) and [`photon::config`](https://docs.rs/uf-photon/latest/photon/config/).
 
 ## Learn more
 
 | Link | Why |
 |------|-----|
+| [Getting started](https://docs.rs/uf-photon/latest/photon/#getting-started) | Topology choice + wiring (primary) |
 | [docs.rs `photon::config`](https://docs.rs/uf-photon/latest/photon/config/) | Env vars, macro attrs, builder options |
 | [docs/macro-expansion.md](docs/macro-expansion.md) | What `#[topic]` / `#[subscribe]` generate |
-| `cargo doc -p uf-photon --features runtime,mem --open` | Architecture + API (primary) |
+| `cargo doc -p uf-photon --features runtime,mem --open` | Full API reference |
 | [photon/README.md](photon/README.md) | Features, wiring checklist |
 | [photon-bench/PERFORMANCE_STUDY.md](photon-bench/PERFORMANCE_STUDY.md) | Performance methodology |
 | [photon-bench/EXPERIMENTS.md](photon-bench/EXPERIMENTS.md) | Benchmark registry |
@@ -145,7 +146,7 @@ See [docs.rs `photon::config`](https://docs.rs/uf-photon/latest/photon/config/) 
 
 ## FAQ
 
-**Is it production-ready?** v0.1.0 early release; `mem` and `sqlite` tiers are tested in CI; NATS / Fluvio / Kafka adapters have PFH fleet ingress numbers — see [PERFORMANCE_STUDY.md](photon-bench/PERFORMANCE_STUDY.md) and [EXPERIMENTS.md](photon-bench/EXPERIMENTS.md).
+**Is it production-ready?** v0.1.1 early release; `mem` and `sqlite` tiers are tested in CI; NATS / Fluvio / Kafka adapters have PFH fleet ingress numbers — see [PERFORMANCE_STUDY.md](photon-bench/PERFORMANCE_STUDY.md) and [EXPERIMENTS.md](photon-bench/EXPERIMENTS.md).
 
 **Do I need an external broker?** No for single-process — default `mem` is in-memory; `sqlite` adds durable embedded storage. Use `nats`, `fluvio`, or `kafka` for fleet scale.
 

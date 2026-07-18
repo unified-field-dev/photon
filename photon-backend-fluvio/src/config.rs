@@ -84,6 +84,10 @@ pub const MAX_INFLIGHT_ENV: &str = "PHOTON_FLUVIO_MAX_INFLIGHT";
 /// **Configuration lives here.** Set builder methods explicitly; unset fields fall back to
 /// `PHOTON_FLUVIO_*` environment variables via [`from_env_defaults`](Self::from_env_defaults).
 ///
+/// Use the **same** builder settings on every Mode 2 publisher and worker binary that shares a
+/// cluster. Getting started:
+/// [Mode 2](https://docs.rs/uf-photon/latest/photon/#mode-2--brokered-publisher--worker-binaries).
+///
 /// # Options
 ///
 /// | Method / env | Default | Purpose |
@@ -97,26 +101,64 @@ pub const MAX_INFLIGHT_ENV: &str = "PHOTON_FLUVIO_MAX_INFLIGHT";
 /// | [`.max_inflight`](Self::max_inflight) / [`MAX_INFLIGHT_ENV`] | `1` / `256` | Concurrent in-flight publishes (`256` for PFH). |
 /// | [`.topic_shards`](Self::topic_shards) / [`TOPIC_SHARDS_ENV`](crate::stream_shard::TOPIC_SHARDS_ENV) | `1` | Ingress shard count (`K>1` → `photon-s-{i}-{topic}`). |
 ///
-/// # Example
+/// # Examples
 ///
-/// ```rust,no_run
+/// ## Publisher binary
+///
+/// Publish only — skip `start_executor` unless this process also runs handlers.
+///
+/// ```rust,ignore
 /// use std::sync::Arc;
-/// use std::time::Duration;
 ///
-/// use photon_backend_fluvio::FluvioStoragePortBuilder;
+/// use photon_backend_fluvio::{FluvioStoragePort, ReplayCursor};
 /// use photon_runtime::Photon;
 ///
-/// # async fn wire() -> photon_backend::Result<()> {
-/// let port = FluvioStoragePortBuilder::new()
-///     .endpoint("127.0.0.1:9103")
-///     .topic_prefix("photon")
-///     .retention(Duration::from_mins(15))
-///     .build()
-///     .await?;
-/// let _photon = Photon::builder()
-///     .storage_port(Arc::new(port))
+/// # async fn boot_publisher() -> photon_backend::Result<()> {
+/// let port = Arc::new(
+///     FluvioStoragePort::builder()
+///         .from_env_defaults()
+///         .replay_cursor(ReplayCursor::StreamSeq)
+///         .sync_ack(true)
+///         .build()
+///         .await?,
+/// );
+/// let photon = Photon::builder()
+///     .storage_port(port)
 ///     .auto_registry()
 ///     .build()?;
+/// // EventType { … }.publish_on(&photon).await?;
+/// # let _ = photon;
+/// # Ok(())
+/// # }
+/// ```
+///
+/// ## Worker binary
+///
+/// Same port wiring as the publisher, plus `#[subscribe]` handlers and `start_executor`.
+/// Start workers before publishers.
+///
+/// ```rust,ignore
+/// use std::sync::Arc;
+///
+/// use photon_backend_fluvio::{FluvioStoragePort, ReplayCursor};
+/// use photon_core::JsonIdentityFactory;
+/// use photon_runtime::Photon;
+///
+/// # async fn boot_worker() -> photon_backend::Result<()> {
+/// let port = Arc::new(
+///     FluvioStoragePort::builder()
+///         .from_env_defaults()
+///         .replay_cursor(ReplayCursor::StreamSeq)
+///         .sync_ack(true)
+///         .build()
+///         .await?,
+/// );
+/// let photon = Photon::builder()
+///     .storage_port(port)
+///     .auto_registry()
+///     .build()?;
+/// photon.start_executor(Arc::new(JsonIdentityFactory))?;
+/// # let _ = photon;
 /// # Ok(())
 /// # }
 /// ```

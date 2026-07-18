@@ -33,8 +33,21 @@ impl Actor for JsonActor {
 
 /// Reconstructs [`JsonActor`] from JSON captured at publish time.
 ///
-/// Sufficient for README examples, integration tests, and hosts that only need
-/// a debug label at the handler boundary until a custom [`IdentityFactory`] is wired.
+/// Sufficient for README examples, integration tests, and local Getting started walkthroughs that
+/// only need a debug label at the handler boundary. Production hosts usually wire a custom
+/// [`IdentityFactory`] that maps to real principal types.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use std::sync::Arc;
+///
+/// use photon_core::JsonIdentityFactory;
+/// use photon_runtime::Photon;
+///
+/// let photon = Photon::builder().auto_registry().build()?;
+/// photon.start_executor(Arc::new(JsonIdentityFactory))?;
+/// ```
 #[derive(Debug, Default, Clone, Copy)]
 pub struct JsonIdentityFactory;
 

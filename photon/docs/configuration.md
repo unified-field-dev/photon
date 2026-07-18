@@ -89,11 +89,11 @@ Defined in `photon-macros/src/topic.rs`. Full usage: [`topic` macro rustdoc](htt
 | `shards` | no | integer | Virtual shard count for group topics (default 32). |
 | `shard_by` | no | field name | JSON field for shard routing when publish has no explicit key. |
 
-`schema_json` on [`TopicDescriptor`](../../photon_backend/struct.TopicDescriptor.html) is reserved metadata (macro emits `"{}"`); not validated at publish time. Expansion details: [`docs/macro-expansion.md`](macro-expansion.md).
+`schema_json` on [`TopicDescriptor`](../../photon_backend/struct.TopicDescriptor.html) is reserved metadata (macro emits `"{}"`); not validated at publish time. Expansion details: [`docs/macro-expansion.md`](../../docs/macro-expansion.md).
 
 ### `#[photon::subscribe]`
 
-Defined in `photon-macros/src/subscribe.rs`. Full usage: [`subscribe` macro rustdoc](https://docs.rs/uf-photon/latest/photon/attr.subscribe.html). Expansion notes: [`docs/macro-expansion.md`](macro-expansion.md).
+Defined in `photon-macros/src/subscribe.rs`. Full usage: [`subscribe` macro rustdoc](https://docs.rs/uf-photon/latest/photon/attr.subscribe.html). Expansion notes: [`docs/macro-expansion.md`](../../docs/macro-expansion.md).
 
 | Attribute | Required | Values | Purpose |
 |-----------|----------|--------|---------|
@@ -196,5 +196,5 @@ CLI reference: `photon-bench/EXPERIMENTS.md`, `photon-bench/src/cli.rs`.
 | `cargo doc -p uf-photon --features runtime,mem --open` | **Primary** API + configuration (`photon::config`) |
 | `README.md` | Landing, model, FAQ |
 | `photon/README.md` | Facade features and wiring checklist |
-| [`macro-expansion.md`](macro-expansion.md) | What `#[topic]` / `#[subscribe]` generate |
+| [`macro-expansion.md`](../../docs/macro-expansion.md) | What `#[topic]` / `#[subscribe]` generate |
 | `docs/adr/001-consumer-groups.md` | Consumer group architecture |

@@ -9,6 +9,8 @@
 //! - [`OpsLog`] — counter / gauge / event trait
 //! - [`install_ops_log`] / [`ops_log`] / [`ops_log_from_env`] — process-wide adapter
 //! - [`ConsoleOpsLog`] / [`NoOpsLog`] — shipped adapters
+//!
+//! Runnable: `cargo run -p uf-photon --example telemetry_ops_log --features runtime,mem`.
 
 mod console;
 mod global;
@@ -25,6 +27,23 @@ pub use noop::NoOpsLog;
 pub use recording::{RecordedCounter, RecordedEvent, RecordedGauge, RecordingOpsLog};
 
 /// Structured ops metrics/events for publish, drain, DLQ, checkpoints.
+///
+/// Install before or during [`PhotonBuilder::build`](https://docs.rs/uf-photon/latest/photon/struct.PhotonBuilder.html#method.build)
+/// via [`PhotonBuilder::ops_log`](https://docs.rs/uf-photon/latest/photon/struct.PhotonBuilder.html#method.ops_log)
+/// (or [`install_ops_log`]). Photon calls this trait from backend instrumentation — it is not the
+/// application event bus.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use photon_runtime::Photon;
+/// use photon_telemetry::ConsoleOpsLog;
+///
+/// let _photon = Photon::builder()
+///     .ops_log(ConsoleOpsLog)
+///     .auto_registry()
+///     .build()?;
+/// ```
 pub trait OpsLog: Send + Sync {
     /// Increment a counter with optional labels.
     fn record_counter(&self, name: &str, labels: &[(&str, &str)], value: f64);

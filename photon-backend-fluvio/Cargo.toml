@@ -1,6 +1,6 @@
 [package]
 name = "photon-backend-fluvio"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Fluvio storage adapter for Photon"
 license.workspace = true

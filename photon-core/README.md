@@ -5,7 +5,7 @@ Identity port and shared types — **no delivery topology**.
 crates.io package: **`uf-photon-core`** (Rust crate name remains `photon_core`):
 
 ```toml
-photon-core = { package = "uf-photon-core", version = "0.1.0" }
+photon-core = { package = "uf-photon-core", version = "0.1.1" }
 ```
 
 ## Exports

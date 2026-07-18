@@ -1,6 +1,6 @@
 [package]
 name = "photon-backend"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Photon publish/subscribe backend implementations and storage adapters"
 license.workspace = true

@@ -32,16 +32,16 @@ debug = 1
 
 [workspace.dependencies]
 quark = { package = "uf-quark", version = "0.1.1" }
-photon-core = { package = "uf-photon-core", version = "0.1.0", path = "photon-core" }
-photon-macros = { version = "0.1.0", path = "photon-macros" }
-photon-telemetry = { version = "0.1.0", path = "photon-telemetry" }
-photon-backend = { version = "0.1.0", path = "photon-backend", default-features = false }
-photon-runtime = { version = "0.1.0", path = "photon-runtime", default-features = false }
-photon-backend-nats = { version = "0.1.0", path = "photon-backend-nats" }
-photon-backend-kafka = { version = "0.1.0", path = "photon-backend-kafka" }
-photon-backend-fluvio = { version = "0.1.0", path = "photon-backend-fluvio" }
-photon-backend-sqlite = { version = "0.1.0", path = "photon-backend-sqlite" }
-photon = { package = "uf-photon", version = "0.1.0", path = "photon" }
+photon-core = { package = "uf-photon-core", version = "0.1.1", path = "photon-core" }
+photon-macros = { version = "0.1.1", path = "photon-macros" }
+photon-telemetry = { version = "0.1.1", path = "photon-telemetry" }
+photon-backend = { version = "0.1.1", path = "photon-backend", default-features = false }
+photon-runtime = { version = "0.1.1", path = "photon-runtime", default-features = false }
+photon-backend-nats = { version = "0.1.1", path = "photon-backend-nats" }
+photon-backend-kafka = { version = "0.1.1", path = "photon-backend-kafka" }
+photon-backend-fluvio = { version = "0.1.1", path = "photon-backend-fluvio" }
+photon-backend-sqlite = { version = "0.1.1", path = "photon-backend-sqlite" }
+photon = { package = "uf-photon", version = "0.1.1", path = "photon" }
 tempfile = "3"
 sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "sqlite", "postgres"] }
 async-trait = "0.1"

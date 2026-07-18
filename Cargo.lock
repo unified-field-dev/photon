@@ -2373,7 +2373,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -2399,7 +2399,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend-fluvio"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2417,7 +2417,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend-kafka"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2435,7 +2435,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend-nats"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-nats",
  "async-stream",
@@ -2453,7 +2453,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend-sqlite"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2496,7 +2496,7 @@ dependencies = [
 
 [[package]]
 name = "photon-macros"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2505,7 +2505,7 @@ dependencies = [
 
 [[package]]
 name = "photon-runtime"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "futures",
@@ -2521,7 +2521,7 @@ dependencies = [
 
 [[package]]
 name = "photon-telemetry"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde_json",
 ]
@@ -4021,7 +4021,7 @@ checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
 
 [[package]]
 name = "uf-photon"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "futures",
@@ -4044,7 +4044,7 @@ dependencies = [
 
 [[package]]
 name = "uf-photon-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "serde",

@@ -1,6 +1,6 @@
 [package]
 name = "photon-macros"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Proc macros for Photon pub/sub (#[photon::topic], #[photon::subscribe])"
 license.workspace = true
