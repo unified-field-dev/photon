@@ -1,4 +1,7 @@
-//! Manual subscribe stream — **Creating topics** without `#[subscribe]`.
+//! Manual / raw subscribe stream — advanced alternative to typed `EventType::subscribe_on`.
+//!
+//! Prefer `Ping::subscribe_on(&photon, opts)` (see `keyed_topic`) or `#[subscribe]` + executor
+//! (`embedded_mem`) in application code. This example uses [`Photon::subscribe`] by topic name.
 //!
 //! Run: `cargo run -p uf-photon --example manual_subscribe --features runtime,mem`
 //!

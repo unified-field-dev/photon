@@ -4,6 +4,8 @@
 //! without importing the full runtime module tree. For backend wiring and transport types, import
 //! from the crate root explicitly.
 //!
+//! Getting started: [declare topics](https://docs.rs/uf-photon/latest/photon/#3-declare-topics-and-handlers).
+//!
 //! # Example
 //!
 //! ```rust,no_run
@@ -16,8 +18,7 @@
 //!
 //! # async fn demo() -> photon::Result<()> {
 //! let photon = Photon::builder().auto_registry().build()?;
-//! configure(photon);
-//! Demo { n: 1 }.publish().await?;
+//! Demo { n: 1 }.publish_on(&photon).await?;
 //! # Ok(())
 //! # }
 //! ```

@@ -43,15 +43,27 @@ impl GroupOpts {
 
 /// Options for subscribing to a topic.
 ///
+/// Pass to the typed API from [`topic`](https://docs.rs/uf-photon/latest/photon/attr.topic.html):
+/// `EventType::subscribe_on(&photon, opts)`.
+///
+/// Runnable: `keyed_topic`, `consumer_group`. Getting started:
+/// [publish and subscribe](https://docs.rs/uf-photon/latest/photon/#4-publish-and-subscribe).
+///
 /// # Examples
 ///
 /// Ephemeral stream with partition filter (see `keyed_topic` example):
 ///
-/// ```rust,no_run
-/// use photon_backend::SubscribeOpts;
+/// ```rust,ignore
+/// use futures::StreamExt;
+/// use photon::{SubscribeOpts, topic};
 ///
-/// # async fn demo() -> photon_backend::Result<()> {
+/// #[topic(name = "examples.orders", keyed_by = "customer_id")]
+/// struct OrderPlaced { customer_id: String, amount_cents: u64 }
+///
+/// # async fn demo(photon: &photon::Photon) -> photon::Result<()> {
 /// let opts = SubscribeOpts::default_ephemeral().topic_key_filter("alice");
+/// let mut stream = OrderPlaced::subscribe_on(photon, opts).await?;
+/// let _ = stream.next().await;
 /// # Ok(())
 /// # }
 /// ```

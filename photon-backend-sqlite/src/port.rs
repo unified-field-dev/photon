@@ -36,9 +36,38 @@ fn map_sqlx(err: &sqlx::Error) -> PhotonError {
 /// Embedded `SQLite` storage for the `sqlite` adapter tier.
 ///
 /// Write-through persistence with in-memory live fanout. Enable the `sqlite` feature on the
-/// `photon` facade and install via [`PhotonBuilder::storage_port`](https://docs.rs/uf-photon/latest/photon/struct.PhotonBuilder.html#method.storage_port).
+/// `photon` facade and install via
+/// [`PhotonBuilder::storage_port`](https://docs.rs/uf-photon/latest/photon/struct.PhotonBuilder.html#method.storage_port).
 ///
 /// Path / env: see module `config` (`PHOTON_SQLITE_PATH`).
+///
+/// Getting started: [Mode 1 durable](https://docs.rs/uf-photon/latest/photon/#mode-1--embedded-one-binary).
+///
+/// # Examples
+///
+/// ## Mode 1 host (publish + handlers)
+///
+/// One binary owns both publish and `#[subscribe]` dispatch via `start_executor`.
+///
+/// ```rust,ignore
+/// use std::sync::Arc;
+///
+/// use photon_backend_sqlite::SqliteStoragePort;
+/// use photon_core::JsonIdentityFactory;
+/// use photon_runtime::Photon;
+///
+/// # async fn boot() -> photon_backend::Result<()> {
+/// let port = Arc::new(SqliteStoragePort::open("/var/lib/photon/events.db").await?);
+/// let photon = Photon::builder()
+///     .storage_port(port)
+///     .auto_registry()
+///     .build()?;
+/// photon.start_executor(Arc::new(JsonIdentityFactory))?;
+/// // EventType { … }.publish_on(&photon).await?;
+/// # let _ = photon;
+/// # Ok(())
+/// # }
+/// ```
 pub struct SqliteStoragePort {
     pool: SqlitePool,
     crypto: TransportCrypto,

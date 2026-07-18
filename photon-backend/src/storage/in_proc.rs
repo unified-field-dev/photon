@@ -1,4 +1,8 @@
 //! In-process storage port — broadcast bus, replay buffer, checkpoints (no external deps).
+//!
+//! Default Mode 1 adapter. Events stay inside this process — do **not** use for multi-process
+//! or fleet delivery (use a broker adapter; see
+//! [Getting started → Mode 2](https://docs.rs/uf-photon/latest/photon/#mode-2--brokered-publisher--worker-binaries)).
 
 use std::collections::{HashMap, VecDeque};
 use std::pin::Pin;
@@ -30,6 +34,46 @@ fn replay_key(topic_name: &str, topic_key_filter: Option<&str>) -> String {
 }
 
 /// In-process storage for the `mem` adapter tier.
+///
+/// Single-process only: live fanout and a bounded replay buffer live in memory. Photon installs
+/// this by default when you omit
+/// [`PhotonBuilder::storage_port`](https://docs.rs/uf-photon/latest/photon/struct.PhotonBuilder.html#method.storage_port).
+///
+/// **When not to use:** multiple binaries or hosts must share a topic log — pick NATS/Kafka/Fluvio
+/// (Mode 2) or SQLite for durable single-host Mode 1.
+///
+/// Getting started: [Mode 1](https://docs.rs/uf-photon/latest/photon/#mode-1--embedded-one-binary).
+///
+/// # Examples
+///
+/// ## Mode 1 host (publish + handlers)
+///
+/// One binary owns both publish and `#[subscribe]` dispatch via `start_executor`.
+///
+/// ```rust,ignore
+/// use std::sync::Arc;
+///
+/// use photon_backend::{InProcStoragePort, StoragePort, TransportCrypto};
+/// use photon_core::JsonIdentityFactory;
+/// use photon_runtime::Photon;
+///
+/// # fn main() -> photon_backend::Result<()> {
+/// let port: Arc<dyn StoragePort> = Arc::new(InProcStoragePort::new(
+///     TransportCrypto::from_env()?,
+/// ));
+/// let photon = Photon::builder()
+///     .storage_port(port)
+///     .auto_registry()
+///     .build()?;
+/// photon.start_executor(Arc::new(JsonIdentityFactory))?;
+/// // EventType { … }.publish_on(&photon).await?;
+/// # let _ = photon;
+/// # Ok(())
+/// # }
+/// ```
+///
+/// Default path (same mem port, no explicit `storage_port`):
+/// `Photon::builder().auto_registry().build()?`.
 pub struct InProcStoragePort {
     crypto: TransportCrypto,
     tx: broadcast::Sender<Event>,

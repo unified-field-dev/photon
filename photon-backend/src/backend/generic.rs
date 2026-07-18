@@ -17,6 +17,10 @@ use crate::registry::TopicRegistry;
 use crate::storage::{InProcStoragePort, StoragePort};
 
 /// Unified backend — all storage adapters install this wrapping their port.
+///
+/// Prefer selecting a [`StoragePort`](crate::storage::StoragePort) and letting
+/// [`PhotonBuilder`](https://docs.rs/uf-photon/latest/photon/struct.PhotonBuilder.html) install this
+/// automatically. See also the [`EmbeddedBackend`](crate::EmbeddedBackend) alias.
 pub struct GenericPhotonBackend {
     port: Arc<dyn StoragePort>,
     registry: TopicRegistry,
@@ -43,9 +47,11 @@ impl GenericPhotonBackend {
 
     /// Install the default `mem` tier from builder context.
     ///
+    /// Loads `PHOTON_TRANSPORT_KEY` via [`TransportCrypto::from_env`](crate::event::TransportCrypto::from_env).
+    ///
     /// # Errors
     ///
-    /// Returns an error if the operation fails.
+    /// Returns an error if the transport key cannot be loaded from the environment.
     pub fn install_mem(ctx: BackendContext) -> Result<Arc<dyn PhotonBackend>> {
         let port = Arc::new(InProcStoragePort::new(
             crate::event::TransportCrypto::from_env()?,

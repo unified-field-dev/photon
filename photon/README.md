@@ -21,18 +21,20 @@ photon = { package = "uf-photon", version = "0.1.0", features = ["runtime", "mem
 | `fluvio` | Fluvio storage adapter ([`photon-backend-fluvio`](../photon-backend-fluvio/)) |
 | `kafka` | Kafka storage adapter ([`photon-backend-kafka`](../photon-backend-kafka/)) |
 
-Configuration reference: [docs.rs `photon::config`](https://docs.rs/uf-photon/latest/photon/config/). Architecture: [docs.rs `photon`](https://docs.rs/uf-photon/latest/photon/#architecture).
+Configuration reference: [docs.rs `photon::config`](https://docs.rs/uf-photon/latest/photon/config/). Primary tutorial: [Getting started](https://docs.rs/uf-photon/latest/photon/#getting-started) (Mode 1 embedded vs Mode 2 brokered publisher/worker).
 
 Ships with **no default features** (`default = []`). Enable `runtime` + `mem` for the standard evaluation path.
 
 ## Wiring
 
+Follow the rustdoc [Getting started](https://docs.rs/uf-photon/latest/photon/#getting-started) for topology choice. Checklist:
+
 1. Build with `Photon::builder()` — default installs `InProcStoragePort` (`mem`). Requires `PHOTON_TRANSPORT_KEY` (`TransportCrypto::from_env`).
-2. Optionally pass `.storage_port(Arc<dyn StoragePort>)` for `sqlite` or broker adapters.
+2. Optionally pass `.storage_port(Arc<dyn StoragePort>)` for `sqlite` or broker adapters (Mode 2: same port config on every binary).
 3. Call `.auto_registry()` when using `#[photon::topic]` / `#[photon::subscribe]`.
 4. Keep the [`Photon`](https://docs.rs/uf-photon/latest/photon/struct.Photon.html) handle and call `publish_on(&photon)` / `subscribe_on(&photon, opts)` (preferred).
 5. Optional: `photon::configure(photon)` for process-wide `.publish()` / `.subscribe()` sugar.
-6. Call `photon.start_executor(identity)` when using `#[photon::subscribe]` handlers.
+6. Call `photon.start_executor(identity)` on Mode 1 hosts and Mode 2 **workers** (publisher-only binaries can skip).
 
 ### Default bootstrap (mem)
 

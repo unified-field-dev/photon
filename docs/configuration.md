@@ -5,6 +5,8 @@
 Central index for compile-time options, cross-cutting environment variables, and macro attributes.
 **Adapter-specific builder options live on each storage builder type** — this page links there instead of duplicating tables.
 
+**Getting started (topology):** [Mode 1 — Embedded](https://docs.rs/uf-photon/latest/photon/#mode-1--embedded-one-binary) · [Mode 2 — Brokered](https://docs.rs/uf-photon/latest/photon/#mode-2--brokered-publisher--worker-binaries)
+
 ## Precedence
 
 | Layer | When applied | Overrides |
@@ -59,7 +61,7 @@ Runnable host boot: `cargo run -p uf-photon --example embedded_mem --features ru
 
 ## Storage adapter builders
 
-Broker connection, replay, sharding, and env fallbacks are documented **on each builder** (not duplicated here).
+Choose adapters from the crate [Getting started](https://docs.rs/uf-photon/latest/photon/#choose-a-topology) (Mode 1 embedded vs Mode 2 brokered). Broker connection, replay, sharding, and env fallbacks are documented **on each builder** (not duplicated here). Each broker builder includes **publisher binary** and **worker binary** examples; `mem` / `SQLite` show Mode 1 host (`start_executor`) examples.
 
 | Adapter | Builder (config + example) | Resolved config | Storage port |
 |---------|---------------------------|-----------------|--------------|
