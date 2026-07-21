@@ -12,6 +12,8 @@
 //!
 //! Runnable: `cargo run -p uf-photon --example telemetry_ops_log --features runtime,mem`.
 
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
+
 mod console;
 mod global;
 mod noop;

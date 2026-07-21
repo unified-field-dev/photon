@@ -4,6 +4,8 @@ use std::sync::Arc;
 
 use tokio::sync::Semaphore;
 
+use crate::error::{PhotonError, Result};
+
 /// Limits concurrent handler tasks for a subscription.
 pub struct WorkerPool {
     semaphore: Arc<Semaphore>,
@@ -30,14 +32,14 @@ impl WorkerPool {
 
     /// Acquire a permit before running a handler task.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if an internal lock is poisoned.
-    pub async fn acquire(&self) -> tokio::sync::OwnedSemaphorePermit {
+    /// Returns [`PhotonError::Internal`] if the semaphore has been closed.
+    pub async fn acquire(&self) -> Result<tokio::sync::OwnedSemaphorePermit> {
         self.semaphore
             .clone()
             .acquire_owned()
             .await
-            .expect("semaphore closed")
+            .map_err(|_| PhotonError::Internal("handler worker pool semaphore closed".into()))
     }
 }

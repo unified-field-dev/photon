@@ -45,17 +45,13 @@ impl BootstrapSession {
         telemetry::apply_telemetry(self.matrix.telemetry);
         match self.matrix.storage {
             StorageAdapter::Mem => {
-                self.storage_port = Some(crate::backends::install_storage_port(
-                    StorageAdapter::Mem,
-                )?);
+                self.storage_port =
+                    Some(crate::backends::install_storage_port(StorageAdapter::Mem)?);
                 self.ready = true;
                 Ok(())
             }
             StorageAdapter::Nats | StorageAdapter::Fluvio | StorageAdapter::Kafka => {
-                bail!(
-                    "storage {:?} requires install_async()",
-                    self.matrix.storage
-                );
+                bail!("storage {:?} requires install_async()", self.matrix.storage);
             }
             StorageAdapter::Sqlite => {
                 bail!("storage Sqlite requires install_async()");
@@ -73,9 +69,8 @@ impl BootstrapSession {
         if self.matrix.storage == StorageAdapter::Mem {
             return self.install();
         }
-        self.storage_port = Some(
-            crate::backends::install_storage_port_async(self.matrix.storage).await?,
-        );
+        self.storage_port =
+            Some(crate::backends::install_storage_port_async(self.matrix.storage).await?);
         self.ready = true;
         Ok(())
     }

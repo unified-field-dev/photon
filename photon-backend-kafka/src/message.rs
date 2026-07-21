@@ -35,7 +35,7 @@ pub fn encode_event_record(
     }
 
     let body = serde_json::to_vec(event)
-        .map_err(|e| PhotonError::Internal(format!("kafka encode event json: {e}")))?;
+        .map_err(|e| PhotonError::caused("kafka encode event json:", e))?;
 
     let record = Record {
         key: event
@@ -61,7 +61,7 @@ pub fn decode_record(record: &Record, offset: i64) -> Result<DecodedRecord> {
         .as_deref()
         .ok_or_else(|| PhotonError::Internal("kafka record missing payload".into()))?;
     let mut event: Event = serde_json::from_slice(payload)
-        .map_err(|e| PhotonError::Internal(format!("kafka decode event json: {e}")))?;
+        .map_err(|e| PhotonError::caused("kafka decode event json:", e))?;
 
     for (key, value) in &record.headers {
         match key.as_str() {

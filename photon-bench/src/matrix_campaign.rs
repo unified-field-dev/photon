@@ -50,6 +50,8 @@ mod tests {
     fn photon_ops_expands_telemetry() {
         let rows = slice_matrix_rows("photon-ops", MatrixSpec::ci_mem_embedded());
         assert_eq!(rows.len(), 3);
-        assert!(rows.iter().any(|m| m.telemetry == TelemetryAdapter::Console));
+        assert!(rows
+            .iter()
+            .any(|m| m.telemetry == TelemetryAdapter::Console));
     }
 }

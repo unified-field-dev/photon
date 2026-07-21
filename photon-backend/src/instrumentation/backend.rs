@@ -42,6 +42,11 @@ impl PhotonBackend for InstrumentedPhotonBackend {
         self.backend_label
     }
 
+    #[tracing::instrument(
+        name = "photon.publish",
+        skip(self, actor_json, payload_json),
+        fields(backend = self.backend_label, topic = topic_name, topic_key = ?topic_key)
+    )]
     async fn publish(
         &self,
         topic_name: &str,
@@ -60,6 +65,7 @@ impl PhotonBackend for InstrumentedPhotonBackend {
             }
             Err(e) => {
                 metrics::record_publish_error(topic_name, self.backend_label);
+                tracing::warn!(error = %e, "publish failed");
                 Err(e)
             }
         }

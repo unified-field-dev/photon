@@ -8,9 +8,7 @@ use photon_testkit::{BootstrapSession, RunMode, ScenarioRunner};
 use crate::experiments::{resolve_experiment, ExperimentPlan};
 use crate::harness::{self, ResourceSampler};
 use crate::matrix::{matrix_from_cli, shared_store_skip_reason};
-use crate::metrics::{
-    evaluate_pass, publish_slope_vs_index, LoadSummary, PassContext,
-};
+use crate::metrics::{evaluate_pass, publish_slope_vs_index, LoadSummary, PassContext};
 use crate::report::BenchReport;
 use crate::stats::MetricStats;
 
@@ -35,11 +33,7 @@ pub async fn run_experiment(args: RunArgs) -> Result<()> {
     if let Some(nodes) = args.nodes {
         std::env::set_var("PHOTON_BENCH_NODES", nodes.to_string());
     }
-    let matrix = matrix_from_cli(
-        &args.storage,
-        &args.telemetry,
-        args.topology.as_deref(),
-    )?;
+    let matrix = matrix_from_cli(&args.storage, &args.telemetry, args.topology.as_deref())?;
 
     if let Some(reason) = shared_store_skip_reason(&matrix, &args.experiment) {
         let out = skipped_report(&args, &matrix, &reason);
@@ -61,7 +55,11 @@ pub async fn run_experiment(args: RunArgs) -> Result<()> {
     execute_plan(args, matrix, plan).await
 }
 
-async fn execute_plan(args: RunArgs, matrix: photon_testkit::MatrixSpec, plan: ExperimentPlan) -> Result<()> {
+async fn execute_plan(
+    args: RunArgs,
+    matrix: photon_testkit::MatrixSpec,
+    plan: ExperimentPlan,
+) -> Result<()> {
     let mut session = BootstrapSession::new(matrix.clone());
     session.install_async().await?;
 
@@ -124,7 +122,8 @@ fn build_report(
     resource_profile: Option<harness::ResourceProfile>,
 ) -> BenchReport {
     let (publish_samples, delivery_samples) = sample_vectors(result);
-    let publish_ms = (!publish_samples.is_empty()).then(|| MetricStats::summarize(publish_samples.clone()));
+    let publish_ms =
+        (!publish_samples.is_empty()).then(|| MetricStats::summarize(publish_samples.clone()));
     let delivery_wait_ms =
         (!delivery_samples.is_empty()).then(|| MetricStats::summarize(delivery_samples));
 
@@ -144,11 +143,7 @@ fn build_report(
         s
     });
 
-    let status = if result.error.is_none() {
-        "ok"
-    } else {
-        "fail"
-    };
+    let status = if result.error.is_none() { "ok" } else { "fail" };
 
     let ctx = PassContext {
         experiment: plan.id.clone(),

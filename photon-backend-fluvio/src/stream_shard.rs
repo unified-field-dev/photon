@@ -93,7 +93,9 @@ mod tests {
             topic_prefix: "photon".into(),
             retention: std::time::Duration::from_mins(15),
             replicas: 1,
-            crypto: photon_backend::TransportCrypto::from_bytes(*b"photon-dev-transport-key-32bytes"),
+            crypto: photon_backend::TransportCrypto::from_bytes(
+                *b"photon-dev-transport-key-32bytes",
+            ),
             replay_cursor: ReplayCursor::StreamSeq,
             sync_ack: true,
             max_inflight: 1,
@@ -119,7 +121,10 @@ mod tests {
 
     #[test]
     fn legacy_topic_when_single_shard() {
-        assert_eq!(fluvio_topic_for(&test_config(1), 0, "orders"), "photon-orders");
+        assert_eq!(
+            fluvio_topic_for(&test_config(1), 0, "orders"),
+            "photon-orders"
+        );
     }
 
     #[test]

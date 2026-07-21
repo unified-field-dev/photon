@@ -165,9 +165,9 @@ See [Getting started](https://docs.rs/uf-photon/latest/photon/#getting-started) 
 CI runs on every push and PR ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). When local `cargo` is unavailable, use AWS:
 
 ```bash
-./infra/aws/sqlite-smok~/aws/photon-upstream/sqlite-smoke/run-remote-check.sh
+~/aws/photon-upstream/sqlite-smoke/run-remote-check.sh
 ```
 
-Doc verification baseline: [docs/VERIFICATION.md](docs/VERIFICATION.md).
+Doc verification: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 Full matrix commands and WSL `CARGO_TARGET_DIR` notes: [photon/README.md](photon/README.md#verify).

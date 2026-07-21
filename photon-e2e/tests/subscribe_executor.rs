@@ -16,10 +16,7 @@ pub struct TestDispatchEvent {
 }
 
 #[subscribe(topic = "test.subscribe.dispatch", durable = "test-handler")]
-async fn on_test_dispatch(
-    actor: Box<dyn Actor>,
-    event: TestDispatchEvent,
-) -> photon::Result<()> {
+async fn on_test_dispatch(actor: Box<dyn Actor>, event: TestDispatchEvent) -> photon::Result<()> {
     assert_eq!(actor.label(), "photon_publish");
     assert_eq!(event.value, 42);
     HANDLER_INVOCATIONS.fetch_add(1, Ordering::SeqCst);

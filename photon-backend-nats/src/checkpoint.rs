@@ -28,7 +28,10 @@ impl CheckpointStore {
     /// # Errors
     ///
     /// Returns an error when the bucket cannot be initialized.
-    pub async fn connect(jetstream: &async_nats::jetstream::Context, config: &NatsConfig) -> Result<Self> {
+    pub async fn connect(
+        jetstream: &async_nats::jetstream::Context,
+        config: &NatsConfig,
+    ) -> Result<Self> {
         let store = ensure_kv_bucket(jetstream, CHECKPOINT_BUCKET).await?;
         Ok(Self {
             store,
@@ -56,10 +59,14 @@ impl CheckpointStore {
             let shard = pick_shard(key, self.config.stream_shards);
             let ck = checkpoint_key_sharded(subscription_name, topic_name, Some(key), shard);
             let local = load_i64(&self.store, &ck).await?;
-            return Ok(local.map(|seq| composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0))));
+            return Ok(
+                local.map(|seq| composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0)))
+            );
         }
 
-        let map = self.load_unkeyed_shard_map(subscription_name, topic_name).await?;
+        let map = self
+            .load_unkeyed_shard_map(subscription_name, topic_name)
+            .await?;
         Ok(max_composite_from_map(&map))
     }
 
@@ -84,11 +91,12 @@ impl CheckpointStore {
         if topic_key.is_some() {
             let routing = publish_routing_key(topic_key, "");
             let expected = pick_shard(&routing, self.config.stream_shards);
-            let shard = if self.config.stream_shards > 1 && last_seq < crate::stream_shard::SEQ_STRIDE {
-                expected
-            } else {
-                shard
-            };
+            let shard =
+                if self.config.stream_shards > 1 && last_seq < crate::stream_shard::SEQ_STRIDE {
+                    expected
+                } else {
+                    shard
+                };
             let key = checkpoint_key_sharded(subscription_name, topic_name, topic_key, shard);
             return put_i64(&self.store, &key, local).await;
         }
@@ -132,7 +140,10 @@ async fn load_i64(store: &kv::Store, key: &str) -> Result<Option<i64>> {
     match store.get(key).await {
         Ok(Some(bytes)) => parse_checkpoint_bytes(&bytes).map(Some),
         Ok(None) => Ok(None),
-        Err(e) => Err(PhotonError::Internal(format!("nats checkpoint load {key}: {e}"))),
+        Err(e) => Err(PhotonError::caused(
+            format!("nats checkpoint load {key}"),
+            e,
+        )),
     }
 }
 
@@ -140,7 +151,7 @@ async fn put_i64(store: &kv::Store, key: &str, value: i64) -> Result<()> {
     store
         .put(key, Bytes::from(value.to_string()))
         .await
-        .map_err(|e| PhotonError::Internal(format!("nats checkpoint commit {key}: {e}")))?;
+        .map_err(|e| PhotonError::caused(format!("nats checkpoint commit {key}"), e))?;
     Ok(())
 }
 
@@ -148,33 +159,35 @@ async fn load_shard_map(store: &kv::Store, key: &str) -> Result<HashMap<u32, i64
     match store.get(key).await {
         Ok(Some(bytes)) => parse_shard_map_bytes(&bytes),
         Ok(None) => Ok(HashMap::new()),
-        Err(e) => Err(PhotonError::Internal(format!("nats checkpoint load {key}: {e}"))),
+        Err(e) => Err(PhotonError::caused(
+            format!("nats checkpoint load {key}"),
+            e,
+        )),
     }
 }
 
 async fn put_json_map(store: &kv::Store, key: &str, map: &HashMap<u32, i64>) -> Result<()> {
-    let json = serde_json::to_string(map).map_err(|e| {
-        PhotonError::Internal(format!("nats checkpoint encode shard map: {e}"))
-    })?;
+    let json = serde_json::to_string(map)
+        .map_err(|e| PhotonError::caused("nats checkpoint encode shard map:", e))?;
     store
         .put(key, Bytes::from(json))
         .await
-        .map_err(|e| PhotonError::Internal(format!("nats checkpoint commit {key}: {e}")))?;
+        .map_err(|e| PhotonError::caused(format!("nats checkpoint commit {key}"), e))?;
     Ok(())
 }
 
 fn parse_checkpoint_bytes(bytes: &Bytes) -> Result<i64> {
     let raw = std::str::from_utf8(bytes)
-        .map_err(|e| PhotonError::Internal(format!("nats checkpoint parse utf8: {e}")))?;
+        .map_err(|e| PhotonError::caused("nats checkpoint parse utf8:", e))?;
     raw.parse::<i64>()
-        .map_err(|e| PhotonError::Internal(format!("nats checkpoint parse i64 '{raw}': {e}")))
+        .map_err(|e| PhotonError::caused(format!("nats checkpoint parse i64 '{raw}'"), e))
 }
 
 fn parse_shard_map_bytes(bytes: &Bytes) -> Result<HashMap<u32, i64>> {
     let raw = std::str::from_utf8(bytes)
-        .map_err(|e| PhotonError::Internal(format!("nats checkpoint parse utf8: {e}")))?;
+        .map_err(|e| PhotonError::caused("nats checkpoint parse utf8:", e))?;
     let value: Value = serde_json::from_str(raw)
-        .map_err(|e| PhotonError::Internal(format!("nats checkpoint parse json: {e}")))?;
+        .map_err(|e| PhotonError::caused("nats checkpoint parse json:", e))?;
     let Some(obj) = value.as_object() else {
         return Ok(HashMap::new());
     };
@@ -189,9 +202,7 @@ fn parse_shard_map_bytes(bytes: &Bytes) -> Result<HashMap<u32, i64>> {
 
 fn max_composite_from_map(map: &HashMap<u32, i64>) -> Option<i64> {
     map.iter()
-        .map(|(shard, local)| {
-            composite_seq(*shard, u64::try_from((*local).max(0)).unwrap_or(0))
-        })
+        .map(|(shard, local)| composite_seq(*shard, u64::try_from((*local).max(0)).unwrap_or(0)))
         .max()
 }
 

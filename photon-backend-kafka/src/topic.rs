@@ -15,8 +15,13 @@ const TOPIC_TIMEOUT_MS: i32 = 30_000;
 ///
 /// Returns an error when topic creation fails.
 pub async fn ensure_checkpoint_topic(client: &SharedClient, config: &KafkaConfig) -> Result<()> {
-    create_topic_if_missing(client, &config.checkpoint_topic(), 1, config.effective_replicas())
-        .await
+    create_topic_if_missing(
+        client,
+        &config.checkpoint_topic(),
+        1,
+        config.effective_replicas(),
+    )
+    .await
 }
 
 /// Ensure a data topic exists before publish/subscribe.
@@ -42,9 +47,9 @@ async fn create_topic_if_missing(
         return Ok(());
     }
 
-    let controller = client.controller_client().map_err(|e| {
-        PhotonError::Internal(format!("kafka controller client {name}: {e}"))
-    })?;
+    let controller = client
+        .controller_client()
+        .map_err(|e| PhotonError::caused(format!("kafka controller client {name}"), e))?;
     match controller
         .create_topic(
             name,
@@ -69,7 +74,7 @@ async fn topic_exists(client: &SharedClient, name: &str) -> Result<bool> {
     {
         Ok(_) => Ok(true),
         Err(e) if e.to_string().contains("UnknownTopicOrPartition") => Ok(false),
-        Err(e) => Err(PhotonError::Internal(format!("kafka metadata {name}: {e}"))),
+        Err(e) => Err(PhotonError::caused(format!("kafka metadata {name}"), e)),
     }
 }
 

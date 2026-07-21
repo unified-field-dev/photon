@@ -22,8 +22,8 @@ pub fn encode_event(event: &Event) -> Result<(HeaderMap, Bytes)> {
         headers.insert(HEADER_TOPIC_KEY, HeaderValue::from(key));
     }
 
-    let body = serde_json::to_vec(event)
-        .map_err(|e| PhotonError::Internal(format!("nats encode event json: {e}")))?;
+    let body =
+        serde_json::to_vec(event).map_err(|e| PhotonError::caused("nats encode event json:", e))?;
     Ok((headers, Bytes::from(body)))
 }
 
@@ -34,10 +34,13 @@ pub fn encode_event(event: &Event) -> Result<(HeaderMap, Bytes)> {
 /// Returns an error when headers or payload cannot be parsed.
 pub fn decode_event(message: &Message) -> Result<Event> {
     let mut event: Event = serde_json::from_slice(&message.payload)
-        .map_err(|e| PhotonError::Internal(format!("nats decode event json: {e}")))?;
+        .map_err(|e| PhotonError::caused("nats decode event json:", e))?;
 
     if let Some(headers) = message.headers.as_ref() {
-        if let Some(header_id) = headers.get(HEADER_EVENT_ID).map(async_nats::HeaderValue::as_str) {
+        if let Some(header_id) = headers
+            .get(HEADER_EVENT_ID)
+            .map(async_nats::HeaderValue::as_str)
+        {
             if header_id != event.event_id {
                 return Err(PhotonError::Internal(format!(
                     "nats event_id header mismatch: header={header_id} body={}",

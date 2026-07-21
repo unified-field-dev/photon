@@ -150,8 +150,7 @@ impl StoragePort for InProcStoragePort {
             payload_json,
             created_at: Utc::now(),
         };
-        self.events
-            .insert(event.event_id.clone(), event.clone());
+        self.events.insert(event.event_id.clone(), event.clone());
         self.push_replay(&event).await;
         let _ = self.tx.send(event.clone());
         Ok(event)
@@ -261,10 +260,7 @@ impl StoragePort for InProcStoragePort {
         let mut removed = 0u64;
         let mut buf = self.replay_buffer.write().await;
         if let Some(queue) = buf.get_mut(&key) {
-            while queue
-                .front()
-                .is_some_and(|e| e.seq < truncate_bound)
-            {
+            while queue.front().is_some_and(|e| e.seq < truncate_bound) {
                 if let Some(ev) = queue.pop_front() {
                     self.events.remove(&ev.event_id);
                     removed += 1;

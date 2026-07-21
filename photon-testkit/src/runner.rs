@@ -9,8 +9,8 @@ use futures::StreamExt;
 use photon_core::JsonIdentityFactory;
 use photon_runtime::{configure, Photon};
 
-use crate::bootstrap::BootstrapSession;
 use crate::bench_handlers::{executor_invocation_count, reset_executor_invocations};
+use crate::bootstrap::BootstrapSession;
 use crate::consumer_group;
 use crate::cross_node::{self, FANOUT_PUBLISH_COUNT};
 use crate::fixtures::smoke_actor_json;
@@ -276,7 +276,8 @@ impl<'a> ScenarioRunner<'a> {
             }
             ScenarioStep::CrossNodeFanout { topic } => {
                 if let Some(result) =
-                    handle_cross_node_fanout(self, spec, matrix_slug, step_index, ctx, topic).await?
+                    handle_cross_node_fanout(self, spec, matrix_slug, step_index, ctx, topic)
+                        .await?
                 {
                     return Ok(Some(result));
                 }
@@ -324,15 +325,9 @@ impl<'a> ScenarioRunner<'a> {
                 }
             }
             ScenarioStep::AssertNoDelivery { wait_ms } => {
-                if let Some(result) = handle_assert_no_delivery(
-                    spec,
-                    matrix_slug,
-                    step_index,
-                    mode,
-                    ctx,
-                    *wait_ms,
-                )
-                .await
+                if let Some(result) =
+                    handle_assert_no_delivery(spec, matrix_slug, step_index, mode, ctx, *wait_ms)
+                        .await
                 {
                     return Ok(Some(result));
                 }
@@ -470,7 +465,10 @@ async fn warm_live_subscribers(ctx: &RunContext, topic: &str) -> Result<()> {
     }
     for sub in &ctx.subscriptions {
         if let Some(key) = &sub.key_filter {
-            if !probe_keys.iter().any(|k| k.as_deref() == Some(key.as_str())) {
+            if !probe_keys
+                .iter()
+                .any(|k| k.as_deref() == Some(key.as_str()))
+            {
                 probe_keys.push(Some(key.clone()));
             }
         }
@@ -500,9 +498,7 @@ async fn warm_live_subscribers(ctx: &RunContext, topic: &str) -> Result<()> {
         }
         tokio::time::sleep(crate::shared_store::subscribe_attach_warmup()).await;
     }
-    bail!(
-        "live-tail subscriber warmup failed: expected {n} deliveries per probe on {topic}"
-    );
+    bail!("live-tail subscriber warmup failed: expected {n} deliveries per probe on {topic}");
 }
 
 async fn handle_restart_runtime(runner: &ScenarioRunner<'_>, ctx: &mut RunContext) -> Result<()> {
@@ -690,15 +686,7 @@ async fn handle_parallel_multi_stream(
         let photon = Arc::clone(&photon);
         let topic = format!("testkit.pf4.{s}");
         tasks.push(tokio::spawn(async move {
-            publish_at_rate(
-                &photon,
-                &topic,
-                rate_per_stream,
-                duration_secs,
-                false,
-                None,
-            )
-            .await
+            publish_at_rate(&photon, &topic, rate_per_stream, duration_secs, false, None).await
         }));
     }
 
@@ -861,10 +849,8 @@ async fn handle_consumer_group_static(
             if publish_count > 0 {
                 ctx.load.published = outcome.published;
             }
-            ctx.delivery_count.store(
-                outcome.delivered_a + outcome.delivered_b,
-                Ordering::SeqCst,
-            );
+            ctx.delivery_count
+                .store(outcome.delivered_a + outcome.delivered_b, Ordering::SeqCst);
             ctx.step_timings.push(StepTiming {
                 step_index,
                 op: if publish_count == 0 {
@@ -883,7 +869,8 @@ async fn handle_consumer_group_static(
                     load: Some(std::mem::take(&mut ctx.load)),
                     error: Some(format!(
                         "consumer group coverage gap: unique {} / published {}",
-                        outcome.unique_event_ids, outcome.published.max(ctx.load.published)
+                        outcome.unique_event_ids,
+                        outcome.published.max(ctx.load.published)
                     )),
                 }));
             }
@@ -922,10 +909,8 @@ async fn handle_consumer_group_round_robin(
     {
         Ok(outcome) => {
             ctx.load.published = outcome.published;
-            ctx.delivery_count.store(
-                outcome.delivered_a + outcome.delivered_b,
-                Ordering::SeqCst,
-            );
+            ctx.delivery_count
+                .store(outcome.delivered_a + outcome.delivered_b, Ordering::SeqCst);
             ctx.step_timings.push(StepTiming {
                 step_index,
                 op: "consumer_group_round_robin".into(),
@@ -1005,16 +990,16 @@ async fn handle_cross_node_fanout(
                 .store(FANOUT_PUBLISH_COUNT, Ordering::SeqCst);
             Ok(None)
         }
-        cross_node::CrossNodeStepOutcome::FailDelivery { deliveries, error } => Ok(Some(
-            ScenarioResult {
+        cross_node::CrossNodeStepOutcome::FailDelivery { deliveries, error } => {
+            Ok(Some(ScenarioResult {
                 scenario_id: spec.id.clone(),
                 matrix_slug: matrix_slug.to_string(),
                 deliveries,
                 step_timings: std::mem::take(&mut ctx.step_timings),
                 load: Some(std::mem::take(&mut ctx.load)),
                 error: Some(error),
-            },
-        )),
+            }))
+        }
         cross_node::CrossNodeStepOutcome::Err { error } => Ok(Some(ScenarioResult {
             scenario_id: spec.id.clone(),
             matrix_slug: matrix_slug.to_string(),
@@ -1148,7 +1133,8 @@ async fn publish_firehose_at_rate(
             {
                 Ok(_) => {
                     published += 1;
-                    if published.is_multiple_of(FIREHOSE_SAMPLE_EVERY) && samples.len() < FIREHOSE_SAMPLE_CAP
+                    if published.is_multiple_of(FIREHOSE_SAMPLE_EVERY)
+                        && samples.len() < FIREHOSE_SAMPLE_CAP
                     {
                         samples.push(op_start.elapsed().as_secs_f64() * 1000.0);
                     }
@@ -1229,7 +1215,10 @@ mod tests {
         let mut session = BootstrapSession::new(MatrixSpec::ci_mem_embedded());
         session.install().expect("install");
         let result = ScenarioRunner::new(&session)
-            .run(&ScenarioSpec::publish_subscribe_smoke(), RunMode::Correctness)
+            .run(
+                &ScenarioSpec::publish_subscribe_smoke(),
+                RunMode::Correctness,
+            )
             .await
             .expect("run");
         assert!(result.error.is_none(), "{:?}", result.error);

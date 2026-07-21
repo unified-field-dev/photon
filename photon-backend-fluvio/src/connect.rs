@@ -20,7 +20,7 @@ pub async fn connect_fluvio(config: &FluvioConfig) -> Result<SharedClient> {
     let cluster_config = FluvioClusterConfig::new(config.endpoint.clone());
     let client = Fluvio::connect_with_config(&cluster_config)
         .await
-        .map_err(|e| PhotonError::Internal(format!("fluvio connect {}: {e}", config.endpoint)))?;
+        .map_err(|e| PhotonError::caused(format!("fluvio connect {}", config.endpoint), e))?;
     Ok(Arc::new(client))
 }
 

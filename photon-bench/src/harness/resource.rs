@@ -49,7 +49,8 @@ impl ResourceSampler {
             let mut cpu_samples: Vec<f64> = Vec::new();
 
             let clock_ticks = clock_ticks_per_sec();
-            let ncpu = std::thread::available_parallelism().map_or(1, std::num::NonZero::get) as f64;
+            let ncpu =
+                std::thread::available_parallelism().map_or(1, std::num::NonZero::get) as f64;
             let mut prev_ticks = read_cpu_ticks().unwrap_or(0);
             let mut prev_at = Instant::now();
 

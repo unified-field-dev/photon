@@ -170,7 +170,9 @@ impl ScenarioSpec {
                     keyed: false,
                     topic_key: None,
                 },
-                ScenarioStep::AssertDelivery { expected_count: count },
+                ScenarioStep::AssertDelivery {
+                    expected_count: count,
+                },
             ],
         }
     }
@@ -219,7 +221,9 @@ impl ScenarioSpec {
                     accumulate: false,
                     delivery_delay_ms: None,
                 },
-                ScenarioStep::AssertDelivery { expected_count: count },
+                ScenarioStep::AssertDelivery {
+                    expected_count: count,
+                },
             ],
         }
     }
@@ -250,9 +254,7 @@ impl ScenarioSpec {
                 });
             }
         }
-        steps.push(ScenarioStep::AssertDelivery {
-            expected_count: 4,
-        });
+        steps.push(ScenarioStep::AssertDelivery { expected_count: 4 });
         Self {
             id: "keyed-filter-cardinality".into(),
             steps,
@@ -286,7 +288,9 @@ impl ScenarioSpec {
                     accumulate: false,
                     delivery_delay_ms: None,
                 },
-                ScenarioStep::AssertDelivery { expected_count: count },
+                ScenarioStep::AssertDelivery {
+                    expected_count: count,
+                },
             ],
         }
     }
@@ -328,7 +332,12 @@ impl ScenarioSpec {
 
     /// Static 2-member consumer group, disjoint shards, full coverage (BM-PG0).
     #[must_use]
-    pub fn consumer_group_static(topic: &str, group: &str, shard_count: u32, publish_count: u32) -> Self {
+    pub fn consumer_group_static(
+        topic: &str,
+        group: &str,
+        shard_count: u32,
+        publish_count: u32,
+    ) -> Self {
         Self {
             id: "consumer-group-static".into(),
             steps: vec![ScenarioStep::ConsumerGroupStatic {
@@ -491,9 +500,7 @@ impl ScenarioSpec {
             keyed: false,
             topic_key: None,
         });
-        steps.push(ScenarioStep::AssertDelivery {
-            expected_count: n,
-        });
+        steps.push(ScenarioStep::AssertDelivery { expected_count: n });
         Self {
             id: format!("multi-subscriber-{n}"),
             steps,
@@ -517,7 +524,11 @@ impl ScenarioSpec {
 
     /// M parallel publishers on one topic at aggregate rate (BM-PF2).
     #[must_use]
-    pub fn publish_parallel_at_rate(publishers: u32, aggregate_rate: u32, duration_secs: u32) -> Self {
+    pub fn publish_parallel_at_rate(
+        publishers: u32,
+        aggregate_rate: u32,
+        duration_secs: u32,
+    ) -> Self {
         Self {
             id: format!("parallel-publish-{publishers}x{aggregate_rate}-{duration_secs}"),
             steps: vec![ScenarioStep::ParallelPublishAtRate {
@@ -584,7 +595,11 @@ impl ScenarioSpec {
 
     /// Sustained publish with N fanout subscribers (BM-PFS).
     #[must_use]
-    pub fn fanout_sustained_at_rate(subscriber_count: u32, rate_per_sec: u32, duration_secs: u32) -> Self {
+    pub fn fanout_sustained_at_rate(
+        subscriber_count: u32,
+        rate_per_sec: u32,
+        duration_secs: u32,
+    ) -> Self {
         let topic = "testkit.fanout.load".to_string();
         let mut steps = Vec::new();
         for i in 0..subscriber_count {
@@ -737,7 +752,12 @@ impl ScenarioSpec {
 
     /// Round-robin shard assignment with two members (PG0 via env algorithm).
     #[must_use]
-    pub fn consumer_group_round_robin(topic: &str, group: &str, shard_count: u32, publish_count: u32) -> Self {
+    pub fn consumer_group_round_robin(
+        topic: &str,
+        group: &str,
+        shard_count: u32,
+        publish_count: u32,
+    ) -> Self {
         Self {
             id: "consumer-group-round-robin".into(),
             steps: vec![ScenarioStep::ConsumerGroupRoundRobin {

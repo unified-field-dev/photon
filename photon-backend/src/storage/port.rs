@@ -183,11 +183,7 @@ pub trait StoragePort: Send + Sync {
     /// # Contract
     ///
     /// - Default returns `None` (no delivery-layer retention pin).
-    async fn delivery_seq_pin(
-        &self,
-        topic_name: &str,
-        topic_key: Option<&str>,
-    ) -> Option<i64> {
+    async fn delivery_seq_pin(&self, topic_name: &str, topic_key: Option<&str>) -> Option<i64> {
         let _ = (topic_name, topic_key);
         None
     }

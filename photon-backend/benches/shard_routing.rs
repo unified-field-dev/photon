@@ -2,6 +2,7 @@
 //!
 //! Run: `cargo bench -p photon-backend --bench shard_routing --features runtime`
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 #![allow(missing_docs)]
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};

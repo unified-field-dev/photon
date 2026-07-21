@@ -3,12 +3,10 @@
 //! Run: `cargo run -p uf-photon --example subscribe_v2 --features runtime,mem`
 #![allow(missing_docs)]
 #![allow(clippy::unused_async, clippy::used_underscore_binding)]
-
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::sync::Arc;
 
-use photon::{
-    configure, subscribe, topic, Actor, HandlerCtx, JsonIdentityFactory, Photon,
-};
+use photon::{configure, subscribe, topic, Actor, HandlerCtx, JsonIdentityFactory, Photon};
 
 #[topic(name = "examples.subscribe_v2", keyed_by = "name")]
 pub struct GreetingSent {
@@ -35,9 +33,7 @@ async fn on_greeting_arc(
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     let photon = Photon::builder().auto_registry().build()?;
     photon.start_executor(Arc::new(JsonIdentityFactory))?;

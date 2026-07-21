@@ -2,6 +2,7 @@
 //!
 //! Run: `cargo bench -p photon-backend --bench envelope_crypto --features runtime`
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 #![allow(missing_docs)]
 
 use criterion::{criterion_group, criterion_main, Criterion};
@@ -14,18 +15,12 @@ fn bench_encrypt_decrypt(c: &mut Criterion) {
     let payload = json!({"order_id": "ord-1", "amount_cents": 9900u64});
 
     c.bench_function("envelope_encrypt", |b| {
-        b.iter(|| {
-            crypto
-                .encrypt(&actor, &payload)
-                .expect("encrypt")
-        });
+        b.iter(|| crypto.encrypt(&actor, &payload).expect("encrypt"));
     });
 
     let ciphertext = crypto.encrypt(&actor, &payload).expect("encrypt once");
     c.bench_function("envelope_decrypt", |b| {
-        b.iter(|| {
-            crypto.decrypt(&ciphertext).expect("decrypt")
-        });
+        b.iter(|| crypto.decrypt(&ciphertext).expect("decrypt"));
     });
 
     c.bench_function("envelope_roundtrip", |b| {

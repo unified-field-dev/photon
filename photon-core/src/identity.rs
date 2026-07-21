@@ -84,9 +84,7 @@ mod tests {
     impl IdentityFactory for TestFactory {
         fn reconstruct(&self, actor_json: &str) -> Result<Box<dyn Actor>, IdentityError> {
             if actor_json.contains("System") {
-                Ok(Box::new(TestActor {
-                    label: "ok".into(),
-                }))
+                Ok(Box::new(TestActor { label: "ok".into() }))
             } else {
                 Err(IdentityError::InvalidActor("missing System".into()))
             }
@@ -108,10 +106,7 @@ mod tests {
         let actor = factory
             .reconstruct(r#"{"System":{"operation":"t"}}"#)
             .expect("ok");
-        let concrete = actor
-            .into_any()
-            .downcast::<TestActor>()
-            .expect("TestActor");
+        let concrete = actor.into_any().downcast::<TestActor>().expect("TestActor");
         assert_eq!(concrete.label(), "ok");
     }
 }

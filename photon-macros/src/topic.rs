@@ -2,7 +2,9 @@
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse::Parse, parse::ParseStream, parse_macro_input, DeriveInput, Ident, LitInt, LitStr, Token};
+use syn::{
+    parse::Parse, parse::ParseStream, parse_macro_input, DeriveInput, Ident, LitInt, LitStr, Token,
+};
 
 /// Parses topic macro attributes: `name`, `keyed_by`, `delivery`, `shards`, `shard_by`
 struct TopicAttrs {
@@ -69,7 +71,8 @@ pub fn topic_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let delivery_mode = attrs
         .delivery
-        .as_ref().map_or_else(|| "broadcast".to_string(), syn::LitStr::value);
+        .as_ref()
+        .map_or_else(|| "broadcast".to_string(), syn::LitStr::value);
 
     let is_group = delivery_mode == "group" || delivery_mode == "consumer_group";
 
@@ -108,7 +111,10 @@ pub fn topic_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
     );
 
     let descriptor_submit = if is_group {
-        let shards = attrs.shards.as_ref().map_or_else(|| quote! { 32 }, |s| quote! { #s });
+        let shards = attrs
+            .shards
+            .as_ref()
+            .map_or_else(|| quote! { 32 }, |s| quote! { #s });
         let shard_by = attrs
             .shard_by
             .as_ref()
@@ -172,7 +178,9 @@ pub fn topic_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
                 let after_seq = if opts.mode == photon::SubscriptionMode::Durable
                     && opts.subscription_name.is_some()
                 {
-                    let name = opts.subscription_name.as_deref().unwrap();
+                    let name = opts.subscription_name.as_deref().ok_or(
+                        photon::PhotonError::SubscriptionNameRequired,
+                    )?;
                     photon
                         .get_checkpoint_seq(
                             name,

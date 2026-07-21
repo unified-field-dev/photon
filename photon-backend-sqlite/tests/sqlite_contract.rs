@@ -1,5 +1,6 @@
 //! `SQLite` storage port contract tests (no external broker).
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::time::Duration;
 
 use futures::StreamExt;

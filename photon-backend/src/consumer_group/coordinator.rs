@@ -40,7 +40,9 @@ pub struct StaticGroupCoordinator;
 #[async_trait]
 impl ConsumerGroupCoordinator for StaticGroupCoordinator {
     async fn register(&self, member: GroupMember) -> Result<Vec<u32>> {
-        Ok(static_assignment::static_assigned_shards(member.shard_count))
+        Ok(static_assignment::static_assigned_shards(
+            member.shard_count,
+        ))
     }
 
     async fn assigned_shards(&self, group_id: &str, instance_id: &str) -> Result<Vec<u32>> {
@@ -80,12 +82,9 @@ impl<L: super::lease_store::LeaseStore> FleetGroupCoordinator<L> {
 #[async_trait]
 impl<L: super::lease_store::LeaseStore> ConsumerGroupCoordinator for FleetGroupCoordinator<L> {
     async fn register(&self, member: GroupMember) -> Result<Vec<u32>> {
-        let member_index = member
-            .instance_id
-            .parse::<u32>()
-            .unwrap_or_else(|_| {
-                u32::try_from(member.instance_id.len()).unwrap_or(0) % member.shard_count.max(1)
-            });
+        let member_index = member.instance_id.parse::<u32>().unwrap_or_else(|_| {
+            u32::try_from(member.instance_id.len()).unwrap_or(0) % member.shard_count.max(1)
+        });
         let member_count = static_assignment::member_count_from_env().unwrap_or(2);
         let shards = Self::range_assign(member_index, member_count, member.shard_count);
         for shard_id in &shards {

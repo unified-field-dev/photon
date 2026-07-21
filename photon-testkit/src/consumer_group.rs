@@ -101,7 +101,8 @@ pub async fn run_consumer_group_verify_lab(
     } else {
         bail!(
             "consumer group verify failed: unique {} / expected {}",
-            outcome.unique_event_ids, expected_count
+            outcome.unique_event_ids,
+            expected_count
         )
     }
 }
@@ -156,9 +157,7 @@ async fn run_consumer_group_with_shards(
                 break;
             }
             if tokio::time::Instant::now() >= deadline {
-                bail!(
-                    "consumer group lab timeout: got {total}/{expected} deliveries"
-                );
+                bail!("consumer group lab timeout: got {total}/{expected} deliveries");
             }
             tokio::time::sleep(Duration::from_millis(50)).await;
         }

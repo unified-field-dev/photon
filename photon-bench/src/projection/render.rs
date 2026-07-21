@@ -20,7 +20,10 @@ pub fn render_markdown(p: &FleetProjection) -> String {
     if let Some(v) = &p.nats_bottleneck_verdict {
         lines.push(format!("- NATS bottleneck: {v}"));
     }
-    lines.push(format!("- Bottlenecks: {}", p.bottleneck_ranking.join(", ")));
+    lines.push(format!(
+        "- Bottlenecks: {}",
+        p.bottleneck_ranking.join(", ")
+    ));
     lines.push(format!("- {}", p.disclaimer));
     lines.join("\n")
 }

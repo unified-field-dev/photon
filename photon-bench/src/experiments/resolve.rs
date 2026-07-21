@@ -19,7 +19,11 @@ pub fn requires_shared_store(id: &str) -> bool {
     super::registry::requires_shared_store(id)
 }
 
-pub fn resolve_experiment(id: &str, ops: Option<u32>, _matrix: &MatrixSpec) -> Result<ExperimentPlan> {
+pub fn resolve_experiment(
+    id: &str,
+    ops: Option<u32>,
+    _matrix: &MatrixSpec,
+) -> Result<ExperimentPlan> {
     let normalized = id.to_ascii_lowercase();
     if meta_for(&normalized).is_none() {
         bail!("unknown experiment {normalized}; see photon-bench/EXPERIMENTS.md");

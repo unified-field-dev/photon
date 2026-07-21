@@ -13,9 +13,7 @@ use rskafka::record::Record;
 use crate::config::KafkaConfig;
 use crate::connect::SharedClient;
 use crate::stream_shard::{composite_seq, decompose_seq, pick_shard, publish_routing_key};
-use crate::subject::{
-    checkpoint_key, checkpoint_key_sharded, checkpoint_key_unkeyed_shards,
-};
+use crate::subject::{checkpoint_key, checkpoint_key_sharded, checkpoint_key_unkeyed_shards};
 
 /// In-memory cache backed by compact topic persistence.
 #[derive(Clone)]
@@ -62,9 +60,9 @@ impl CheckpointStore {
             let shard = pick_shard(key, self.config.topic_shards);
             let ck = checkpoint_key_sharded(subscription_name, topic_name, Some(key), shard);
             let local = load_i64(&self.cache, &ck)?;
-            return Ok(local.map(|seq| {
-                composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0))
-            }));
+            return Ok(
+                local.map(|seq| composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0)))
+            );
         }
 
         let map = self.load_unkeyed_shard_map(subscription_name, topic_name)?;
@@ -92,12 +90,12 @@ impl CheckpointStore {
         if topic_key.is_some() {
             let routing = publish_routing_key(topic_key, "");
             let expected = pick_shard(&routing, self.config.topic_shards);
-            let shard = if self.config.topic_shards > 1 && last_seq < crate::stream_shard::SEQ_STRIDE
-            {
-                expected
-            } else {
-                shard
-            };
+            let shard =
+                if self.config.topic_shards > 1 && last_seq < crate::stream_shard::SEQ_STRIDE {
+                    expected
+                } else {
+                    shard
+                };
             let key = checkpoint_key_sharded(subscription_name, topic_name, topic_key, shard);
             return put_i64(self, &key, local).await;
         }
@@ -143,14 +141,14 @@ async fn scan_checkpoint_topic(
     let partition_client = client
         .partition_client(topic.clone(), 0, UnknownTopicHandling::Retry)
         .await
-        .map_err(|e| PhotonError::Internal(format!("kafka checkpoint scanner: {e}")))?;
+        .map_err(|e| PhotonError::caused("kafka checkpoint scanner:", e))?;
 
     let mut offset = 0_i64;
     loop {
         let (records, high_watermark) = partition_client
             .fetch_records(offset, 1..1_000_000, 500)
             .await
-            .map_err(|e| PhotonError::Internal(format!("kafka checkpoint scan: {e}")))?;
+            .map_err(|e| PhotonError::caused("kafka checkpoint scan:", e))?;
         if records.is_empty() {
             if offset >= high_watermark {
                 break;
@@ -162,7 +160,10 @@ async fn scan_checkpoint_topic(
             offset = record_and_offset.offset + 1;
             if let Some(key) = record_and_offset.record.key {
                 if let Some(payload) = record_and_offset.record.value {
-                    cache.insert(String::from_utf8_lossy(&key).into_owned(), Bytes::copy_from_slice(&payload));
+                    cache.insert(
+                        String::from_utf8_lossy(&key).into_owned(),
+                        Bytes::copy_from_slice(&payload),
+                    );
                 }
             }
         }
@@ -191,14 +192,9 @@ fn load_shard_map(cache: &DashMap<String, Bytes>, key: &str) -> Result<HashMap<u
         .map_or_else(|| Ok(HashMap::new()), |bytes| parse_shard_map_bytes(&bytes))
 }
 
-async fn put_json_map(
-    store: &CheckpointStore,
-    key: &str,
-    map: &HashMap<u32, i64>,
-) -> Result<()> {
-    let json = serde_json::to_string(map).map_err(|e| {
-        PhotonError::Internal(format!("kafka checkpoint encode shard map: {e}"))
-    })?;
+async fn put_json_map(store: &CheckpointStore, key: &str, map: &HashMap<u32, i64>) -> Result<()> {
+    let json = serde_json::to_string(map)
+        .map_err(|e| PhotonError::caused("kafka checkpoint encode shard map:", e))?;
     let payload = Bytes::from(json);
     store.cache.insert(key.to_string(), payload.clone());
     produce_checkpoint(store, key, payload).await
@@ -210,7 +206,7 @@ async fn produce_checkpoint(store: &CheckpointStore, key: &str, payload: Bytes) 
         .client
         .partition_client(topic, 0, UnknownTopicHandling::Retry)
         .await
-        .map_err(|e| PhotonError::Internal(format!("kafka checkpoint producer {key}: {e}")))?;
+        .map_err(|e| PhotonError::caused(format!("kafka checkpoint producer {key}"), e))?;
 
     let record = Record {
         key: Some(key.as_bytes().to_vec()),
@@ -221,22 +217,22 @@ async fn produce_checkpoint(store: &CheckpointStore, key: &str, payload: Bytes) 
     partition_client
         .produce(vec![record], Compression::default())
         .await
-        .map_err(|e| PhotonError::Internal(format!("kafka checkpoint commit {key}: {e}")))?;
+        .map_err(|e| PhotonError::caused(format!("kafka checkpoint commit {key}"), e))?;
     Ok(())
 }
 
 fn parse_checkpoint_bytes(bytes: &Bytes) -> Result<i64> {
     let raw = std::str::from_utf8(bytes)
-        .map_err(|e| PhotonError::Internal(format!("kafka checkpoint parse utf8: {e}")))?;
+        .map_err(|e| PhotonError::caused("kafka checkpoint parse utf8:", e))?;
     raw.parse::<i64>()
-        .map_err(|e| PhotonError::Internal(format!("kafka checkpoint parse i64 '{raw}': {e}")))
+        .map_err(|e| PhotonError::caused(format!("kafka checkpoint parse i64 '{raw}'"), e))
 }
 
 fn parse_shard_map_bytes(bytes: &Bytes) -> Result<HashMap<u32, i64>> {
     let raw = std::str::from_utf8(bytes)
-        .map_err(|e| PhotonError::Internal(format!("kafka checkpoint parse utf8: {e}")))?;
+        .map_err(|e| PhotonError::caused("kafka checkpoint parse utf8:", e))?;
     let value: serde_json::Value = serde_json::from_str(raw)
-        .map_err(|e| PhotonError::Internal(format!("kafka checkpoint parse json: {e}")))?;
+        .map_err(|e| PhotonError::caused("kafka checkpoint parse json:", e))?;
     let Some(obj) = value.as_object() else {
         return Ok(HashMap::new());
     };
@@ -251,9 +247,7 @@ fn parse_shard_map_bytes(bytes: &Bytes) -> Result<HashMap<u32, i64>> {
 
 fn max_composite_from_map(map: &HashMap<u32, i64>) -> Option<i64> {
     map.iter()
-        .map(|(shard, local)| {
-            composite_seq(*shard, u64::try_from((*local).max(0)).unwrap_or(0))
-        })
+        .map(|(shard, local)| composite_seq(*shard, u64::try_from((*local).max(0)).unwrap_or(0)))
         .max()
 }
 

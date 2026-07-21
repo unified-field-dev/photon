@@ -17,9 +17,7 @@ use crate::consumer::subscribe_push;
 use crate::message::encode_event;
 use crate::publish::PublishPipeline;
 use crate::stream::ensure_streams;
-use crate::stream_shard::{
-    composite_seq, photon_subject_for, pick_shard, publish_routing_key,
-};
+use crate::stream_shard::{composite_seq, photon_subject_for, pick_shard, publish_routing_key};
 
 /// Read NATS URL from the environment.
 ///

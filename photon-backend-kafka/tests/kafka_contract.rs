@@ -1,21 +1,21 @@
 //! Live Kafka integration tests (require `PHOTON_KAFKA_BROKERS`).
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::time::Duration;
 
 use std::sync::Arc;
 
 use futures::StreamExt;
 use photon_backend::{StoragePort, TransportCrypto};
-use photon_backend_kafka::{consumer_group_for, durable_consumer_name, KafkaStoragePort, ReplayCursor};
+use photon_backend_kafka::{
+    consumer_group_for, durable_consumer_name, KafkaStoragePort, ReplayCursor,
+};
 
 fn kafka_available() -> bool {
     std::env::var("PHOTON_KAFKA_BROKERS").is_ok()
 }
 
-async fn wait_for_event_ids(
-    seen: &Arc<tokio::sync::Mutex<Vec<String>>>,
-    expected: &str,
-) {
+async fn wait_for_event_ids(seen: &Arc<tokio::sync::Mutex<Vec<String>>>, expected: &str) {
     let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
     while tokio::time::Instant::now() < deadline {
         if seen.lock().await.iter().any(|id| id == expected) {

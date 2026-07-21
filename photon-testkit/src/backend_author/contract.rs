@@ -18,12 +18,9 @@ pub async fn run_backend_contract(photon: &Photon, topic: &str) -> Result<()> {
         .await?;
 
     let mut stream = photon.subscribe(topic, None, None);
-    let received = stream
-        .next()
-        .await
-        .ok_or_else(|| {
-            photon_backend::PhotonError::Internal("subscribe stream ended empty".into())
-        })??;
+    let received = stream.next().await.ok_or_else(|| {
+        photon_backend::PhotonError::Internal("subscribe stream ended empty".into())
+    })??;
 
     if received.event_id != event_id {
         return Err(photon_backend::PhotonError::Internal(format!(
@@ -33,12 +30,9 @@ pub async fn run_backend_contract(photon: &Photon, topic: &str) -> Result<()> {
     }
 
     if photon.backend_label() == "mem" || photon_capabilities_support_get_event(photon) {
-        let loaded = photon
-            .get_event(&event_id)
-            .await?
-            .ok_or_else(|| {
-                photon_backend::PhotonError::Internal("get_event returned None".into())
-            })?;
+        let loaded = photon.get_event(&event_id).await?.ok_or_else(|| {
+            photon_backend::PhotonError::Internal("get_event returned None".into())
+        })?;
 
         if loaded.event_id != event_id {
             return Err(photon_backend::PhotonError::Internal(

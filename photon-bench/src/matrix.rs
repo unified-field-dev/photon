@@ -70,12 +70,10 @@ pub fn slice_experiments(slice: &str) -> Result<Vec<&'static str>> {
         "executor" => Ok(vec!["bm-p7", "bm-p8"]),
         "crypto" => Ok(vec!["bm-p9"]),
         "broker-spike" => Ok(vec!["bm-pb0", "bm-pb1", "bm-pb2", "bm-pb3"]),
-        "broker-fleet" | "distributed-fleet" => {
-            Ok(vec![
-                "bm-pf0", "bm-pf1", "bm-pf2", "bm-pf3", "bm-pf4", "bm-p6", "bm-pfs", "bm-pfe",
-                "bm-pfh", "bm-pb4", "bm-pb5", "bm-pg0", "bm-pg1", "bm-pg2",
-            ])
-        }
+        "broker-fleet" | "distributed-fleet" => Ok(vec![
+            "bm-pf0", "bm-pf1", "bm-pf2", "bm-pf3", "bm-pf4", "bm-p6", "bm-pfs", "bm-pfe",
+            "bm-pfh", "bm-pb4", "bm-pb5", "bm-pg0", "bm-pg1", "bm-pg2",
+        ]),
         "projection-inputs" => Ok(vec![
             "bm-p0", "bm-p2", "bm-pl2", "bm-p3", "bm-p8", "bm-p6", "bm-pf1", "bm-pf2", "bm-pf3",
             "bm-pf4",
@@ -90,7 +88,12 @@ pub fn report_path(
     matrix: &MatrixSpec,
     hardware: &str,
 ) -> std::path::PathBuf {
-    reports_dir.join(format!("{}-{}-{}.json", experiment, matrix.report_slug(), hardware))
+    reports_dir.join(format!(
+        "{}-{}-{}.json",
+        experiment,
+        matrix.report_slug(),
+        hardware
+    ))
 }
 
 #[cfg(test)]
@@ -103,12 +106,7 @@ mod tests {
         let matrix = MatrixSpec::ci_mem_embedded()
             .with_topology(Topology::EmbeddedComposite)
             .with_telemetry(TelemetryAdapter::Console);
-        let path = report_path(
-            std::path::Path::new("reports"),
-            "bm-p0",
-            &matrix,
-            "dev-wsl",
-        );
+        let path = report_path(std::path::Path::new("reports"), "bm-p0", &matrix, "dev-wsl");
         let name = path.file_name().unwrap().to_string_lossy();
         assert!(name.contains("embedded-composite"), "{name}");
         assert!(name.contains("console"), "{name}");

@@ -4,8 +4,8 @@ use std::time::Duration;
 
 use photon_backend::{PhotonError, Result, TransportCrypto};
 
-use crate::retention::retention_from_env;
 use crate::replicas::replicas_from_env;
+use crate::retention::retention_from_env;
 
 /// Environment variable for Kafka bootstrap brokers.
 pub const BROKERS_ENV: &str = "PHOTON_KAFKA_BROKERS";
@@ -191,9 +191,7 @@ impl KafkaStoragePortBuilder {
             self.brokers = std::env::var(BROKERS_ENV).ok();
         }
         if self.topic_prefix.is_none() {
-            self.topic_prefix = Some(
-                std::env::var(PREFIX_ENV).unwrap_or_else(|_| "photon".into()),
-            );
+            self.topic_prefix = Some(std::env::var(PREFIX_ENV).unwrap_or_else(|_| "photon".into()));
         }
         if self.retention.is_none() {
             self.retention = Some(retention_from_env());
@@ -291,18 +289,14 @@ impl KafkaStoragePortBuilder {
         })?;
         Ok(KafkaConfig {
             brokers,
-            topic_prefix: builder
-                .topic_prefix
-                .unwrap_or_else(|| "photon".into()),
+            topic_prefix: builder.topic_prefix.unwrap_or_else(|| "photon".into()),
             retention: builder.retention.unwrap_or_else(retention_from_env),
             replicas: builder.replicas.unwrap_or_else(replicas_from_env),
             crypto: match builder.crypto {
                 Some(c) => c,
                 None => TransportCrypto::from_env()?,
             },
-            replay_cursor: builder
-                .replay_cursor
-                .unwrap_or(ReplayCursor::StreamSeq),
+            replay_cursor: builder.replay_cursor.unwrap_or(ReplayCursor::StreamSeq),
             sync_ack: builder.sync_ack.unwrap_or(true),
             max_inflight: builder
                 .max_inflight
@@ -340,7 +334,11 @@ fn max_inflight_from_env(sync_ack: bool) -> u32 {
             return n.max(1);
         }
     }
-    if sync_ack { 1 } else { 256 }
+    if sync_ack {
+        1
+    } else {
+        256
+    }
 }
 
 #[cfg(test)]

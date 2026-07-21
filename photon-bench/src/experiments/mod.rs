@@ -4,5 +4,5 @@ mod registry;
 mod resolve;
 mod specs;
 
-pub use registry::{REGISTRY, status_label};
-pub use resolve::{ExperimentPlan, resolve_experiment, requires_shared_store};
+pub use registry::{status_label, REGISTRY};
+pub use resolve::{requires_shared_store, resolve_experiment, ExperimentPlan};

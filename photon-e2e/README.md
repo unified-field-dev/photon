@@ -61,15 +61,15 @@ Backend integration in CI: `subscribe_executor`, `retention_reclaim`, `handler_f
 
 ```bash
 # SQLite + mem gates (auto-provisions t3.medium)
-./infra/aws/sqlite-smok~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh   # after provision.sh + bootstrap.sh
+~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh   # after provision.sh + bootstrap.sh
 
 # All backend e2e gates
 ~/aws/photon-upstream/scripts/run-all-e2e-aws.sh
 
 # Per-backend (see each README)
 ./infra/aws/broker-fleet/scripts/run-e2e-validation-aws.sh
-./infra/aws/kafka-smok~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh
-./infra/aws/fluvio-smok~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh
+~/aws/photon-upstream/kafka-smoke/run-remote-smoke.sh
+~/aws/photon-upstream/fluvio-smoke/run-remote-smoke.sh
 ```
 
 Local `cargo test` (brokers need live services):

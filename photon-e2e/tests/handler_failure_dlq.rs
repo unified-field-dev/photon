@@ -17,12 +17,11 @@ pub struct DlqTestEvent {
 }
 
 #[subscribe(topic = "test.handler.dlq", durable = "failing-handler")]
-async fn on_dlq_test_event(
-    _actor: Box<dyn Actor>,
-    _event: DlqTestEvent,
-) -> photon::Result<()> {
+async fn on_dlq_test_event(_actor: Box<dyn Actor>, _event: DlqTestEvent) -> photon::Result<()> {
     FAILING_HANDLER_INVOCATIONS.fetch_add(1, Ordering::SeqCst);
-    Err(photon::PhotonError::Internal("handler failed intentionally".into()))
+    Err(photon::PhotonError::Internal(
+        "handler failed intentionally".into(),
+    ))
 }
 
 #[tokio::test]
@@ -41,10 +40,7 @@ async fn handler_failure_records_dlq_row() {
 
     tokio::time::sleep(std::time::Duration::from_millis(50)).await;
 
-    DlqTestEvent { value: 1 }
-        .publish()
-        .await
-        .expect("publish");
+    DlqTestEvent { value: 1 }.publish().await.expect("publish");
 
     tokio::time::sleep(std::time::Duration::from_millis(500)).await;
 

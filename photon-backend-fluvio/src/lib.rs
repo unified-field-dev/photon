@@ -24,6 +24,7 @@
 //! - **Checkpoints:** compact topic `photon-checkpoints`.
 //! - **Replay:** [`ReplayCursor::StreamSeq`] uses produce offset+1; [`ReplayCursor::TailOnly`] uses `Offset::end()`.
 
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 mod checkpoint;
 mod config;
 mod connect;

@@ -20,6 +20,9 @@ mod group_topics;
 #[cfg(feature = "backend-author")]
 pub mod backend_author;
 
+pub use bench_handlers::{
+    executor_invocation_count, reset_executor_invocations, EXECUTOR_FIXTURE_TOPIC,
+};
 pub use bootstrap::BootstrapSession;
 pub use consumer_group::{
     run_consumer_group_round_robin_lab, run_consumer_group_static_lab,
@@ -28,9 +31,6 @@ pub use consumer_group::{
 pub use cross_node::{
     apply_cross_node_fanout_step, run_cross_node_fanout_lab, CrossNodeFanoutResult,
     CrossNodeStepOutcome, FANOUT_PUBLISH_COUNT,
-};
-pub use bench_handlers::{
-    executor_invocation_count, reset_executor_invocations, EXECUTOR_FIXTURE_TOPIC,
 };
 pub use identity::StubIdentityFactory;
 pub use matrix::{MatrixSpec, ShardStrategy, StorageAdapter, TelemetryAdapter, Topology};

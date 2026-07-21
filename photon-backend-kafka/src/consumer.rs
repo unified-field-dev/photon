@@ -16,9 +16,7 @@ use crate::checkpoint::CheckpointStore;
 use crate::config::{KafkaConfig, ReplayCursor};
 use crate::connect::SharedClient;
 use crate::message::{decode_record, record_sequence};
-use crate::stream_shard::{
-    composite_seq, kafka_topic_for, local_after_seq_for_shard, pick_shard,
-};
+use crate::stream_shard::{composite_seq, kafka_topic_for, local_after_seq_for_shard, pick_shard};
 
 /// Build a Kafka-safe durable consumer group id for a keyed subscription.
 #[must_use]
@@ -54,12 +52,7 @@ fn start_offset(replay_cursor: ReplayCursor, after_seq: Option<i64>, high_waterm
     }
 }
 
-fn normalize_event_seq(
-    event: &mut Event,
-    offset: i64,
-    config: &KafkaConfig,
-    topic_shard: u32,
-) {
+fn normalize_event_seq(event: &mut Event, offset: i64, config: &KafkaConfig, topic_shard: u32) {
     if config.replay_cursor != ReplayCursor::StreamSeq {
         return;
     }
@@ -134,13 +127,7 @@ pub fn subscribe_stream(
         );
     }
 
-    subscribe_merge_shards(
-        client,
-        config,
-        ensured_topics,
-        topic_name,
-        after_seq,
-    )
+    subscribe_merge_shards(client, config, ensured_topics, topic_name, after_seq)
 }
 
 fn subscribe_merge_shards(

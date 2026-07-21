@@ -1,5 +1,7 @@
 //! Integration test: regressive checkpoint commits on the in-process storage port.
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use std::sync::Arc;
 
 use photon_backend::{InProcStoragePort, StoragePort, TransportCrypto};
@@ -8,9 +10,9 @@ const TOPIC: &str = "test.checkpoint.regression";
 
 #[tokio::test]
 async fn regressive_commit_overwrites_stored_checkpoint_on_mem() {
-    let port: Arc<dyn StoragePort> = Arc::new(InProcStoragePort::new(
-        TransportCrypto::from_bytes(*b"photon-dev-transport-key-32bytes"),
-    ));
+    let port: Arc<dyn StoragePort> = Arc::new(InProcStoragePort::new(TransportCrypto::from_bytes(
+        *b"photon-dev-transport-key-32bytes",
+    )));
 
     for i in 0..10 {
         port.append(

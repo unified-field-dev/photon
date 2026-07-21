@@ -18,9 +18,21 @@ pub struct ExperimentMeta {
 pub const REGISTRY: &[ExperimentMeta] = &[
     meta("bm-p0", AdapterReady, "publish-only (0 subscribers)"),
     meta("bm-p1", AdapterReady, "publish + 1 subscriber delivery"),
-    meta("bm-p2", AdapterReady, "publish + N durable subscribers (fanout)"),
-    meta("bm-p3", AdapterReady, "sustained publish (append-buffer stress)"),
-    meta("bm-p4", AdapterReady, "checkpoint replay after runtime restart"),
+    meta(
+        "bm-p2",
+        AdapterReady,
+        "publish + N durable subscribers (fanout)",
+    ),
+    meta(
+        "bm-p3",
+        AdapterReady,
+        "sustained publish (append-buffer stress)",
+    ),
+    meta(
+        "bm-p4",
+        AdapterReady,
+        "checkpoint replay after runtime restart",
+    ),
     meta("bm-p5", AdapterReady, "keyed topic partition filter"),
     meta(
         "bm-p6",
@@ -35,17 +47,33 @@ pub const REGISTRY: &[ExperimentMeta] = &[
     meta("bm-pl2", AdapterReady, "sustained ~10k publishes/s"),
     meta("bm-pl3", AdapterReady, "sustained ~100k publishes/s"),
     meta("bm-pb0", BrokerReady, "broker publish-only smoke"),
-    meta("bm-pb1", BrokerReady, "queue group load-balance (2 workers)"),
+    meta(
+        "bm-pb1",
+        BrokerReady,
+        "queue group load-balance (2 workers)",
+    ),
     meta("bm-pb2", BrokerReady, "fanout delivery p99 vs N"),
     meta("bm-pb3", BrokerReady, "bounded replay after worker kill"),
-    meta("bm-pb4", BrokerReady, "informational n=1 vs n=3 sweep (ingress: PFH/PF2/PF4)"),
+    meta(
+        "bm-pb4",
+        BrokerReady,
+        "informational n=1 vs n=3 sweep (ingress: PFH/PF2/PF4)",
+    ),
     meta("bm-pb5", BrokerReady, "failover — kill one broker node"),
-    meta("bm-pf0", BrokerReady, "fleet smoke (2 nodes + broker cluster)"),
+    meta(
+        "bm-pf0",
+        BrokerReady,
+        "fleet smoke (2 nodes + broker cluster)",
+    ),
     meta("bm-pf1", BrokerReady, "N subscriber nodes fanout scaling"),
     meta("bm-pf2", BrokerReady, "M publisher nodes aggregate rate"),
     meta("bm-pf3", BrokerReady, "sustained distributed fleet load"),
     meta("bm-pf4", BrokerReady, "multi-partition sustained load"),
-    meta("bm-pfh", BrokerReady, "single-topic firehose throughput sweep"),
+    meta(
+        "bm-pfh",
+        BrokerReady,
+        "single-topic firehose throughput sweep",
+    ),
     meta(
         "bm-pfs",
         BrokerReady,
@@ -56,8 +84,16 @@ pub const REGISTRY: &[ExperimentMeta] = &[
         BrokerReady,
         "sustained executor dispatch with durable handler (1k/s × 60s)",
     ),
-    meta("bm-pg0", GroupReady, "static 2-member consumer group full shard coverage"),
-    meta("bm-pg1", GroupReady, "consumer group throughput vs member count"),
+    meta(
+        "bm-pg0",
+        GroupReady,
+        "static 2-member consumer group full shard coverage",
+    ),
+    meta(
+        "bm-pg1",
+        GroupReady,
+        "consumer group throughput vs member count",
+    ),
     meta(
         "bm-pg2",
         GroupReady,
@@ -91,8 +127,20 @@ pub fn meta_for(id: &str) -> Option<&'static ExperimentMeta> {
 pub fn requires_shared_store(id: &str) -> bool {
     matches!(
         id,
-        "bm-p6" | "bm-pf0" | "bm-pf1" | "bm-pf2" | "bm-pf3" | "bm-pf4" | "bm-pfh"
-            | "bm-pfs" | "bm-pfe"
-            | "bm-pb0" | "bm-pb1" | "bm-pb2" | "bm-pb3" | "bm-pb4" | "bm-pb5"
+        "bm-p6"
+            | "bm-pf0"
+            | "bm-pf1"
+            | "bm-pf2"
+            | "bm-pf3"
+            | "bm-pf4"
+            | "bm-pfh"
+            | "bm-pfs"
+            | "bm-pfe"
+            | "bm-pb0"
+            | "bm-pb1"
+            | "bm-pb2"
+            | "bm-pb3"
+            | "bm-pb4"
+            | "bm-pb5"
     )
 }

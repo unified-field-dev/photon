@@ -1,3 +1,5 @@
+#![allow(clippy::print_stderr)] // ConsoleOpsLog is the explicit stderr adapter.
+
 use super::OpsLog;
 
 /// stderr/stdout structured lines (default dev adapter).

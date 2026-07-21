@@ -34,5 +34,26 @@ tempfile = { workspace = true }
 serde_json = { workspace = true }
 serial_test = "3"
 
-[lints]
-workspace = true
+# Test harness: same workspace lint intent; allow unwrap/expect in fixtures.
+[lints.rust]
+missing_docs = "deny"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+unwrap_used = "allow"
+expect_used = "allow"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "warn"
+todo = "deny"
+unimplemented = "deny"
+must_use_candidate = "allow"
+too_many_lines = "allow"
+similar_names = "allow"
+too_many_arguments = "allow"
+type_complexity = "allow"
+items_after_statements = "allow"
+significant_drop_tightening = "allow"
+used_underscore_binding = "allow"
+module_name_repetitions = "allow"

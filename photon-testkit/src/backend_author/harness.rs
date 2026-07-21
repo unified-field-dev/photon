@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use photon_backend::backend::{BackendContext, PhotonBackend, GenericPhotonBackend};
+use photon_backend::backend::{BackendContext, GenericPhotonBackend, PhotonBackend};
 use photon_backend::{InProcStoragePort, Result, TransportCrypto};
 use photon_runtime::Photon;
 

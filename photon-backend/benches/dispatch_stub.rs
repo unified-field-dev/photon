@@ -3,6 +3,7 @@
 //! Not a Photon executor bench — isolates Tokio scheduling cost for comparison baselines.
 //! Run: `cargo bench -p photon-backend --bench dispatch_stub --features runtime`
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 #![allow(missing_docs)]
 
 use criterion::{criterion_group, criterion_main, Criterion};
