@@ -127,3 +127,53 @@ impl DlqSink {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn params(seq: i64, topic_key: Option<&'static str>) -> DlqRecordParams<'static> {
+        DlqRecordParams {
+            event_id: "evt-1",
+            topic_name: "orders.created",
+            topic_key,
+            seq,
+            subscription_name: Some("worker-a"),
+            reason: FailureReason::HandlerError,
+            error: "boom".to_string(),
+        }
+    }
+
+    #[test]
+    fn record_appends_and_reports_len() {
+        let sink = DlqSink::new();
+        assert!(sink.is_empty());
+
+        sink.record(&params(7, None)).expect("record");
+        assert_eq!(sink.len(), 1);
+        assert!(!sink.is_empty());
+    }
+
+    #[test]
+    fn min_seq_pins_lowest_matching_partition() {
+        let sink = DlqSink::new();
+        sink.record(&params(9, Some("alice"))).expect("record");
+        sink.record(&params(4, Some("alice"))).expect("record");
+        sink.record(&params(2, Some("bob"))).expect("record");
+        sink.record(&params(1, None)).expect("record");
+
+        assert_eq!(sink.min_seq_for("orders.created", Some("alice")), Some(4));
+        assert_eq!(sink.min_seq_for("orders.created", Some("bob")), Some(2));
+        assert_eq!(sink.min_seq_for("orders.created", None), Some(1));
+    }
+
+    #[test]
+    fn min_seq_returns_none_when_no_partition_matches() {
+        let sink = DlqSink::new();
+        sink.record(&params(5, Some("alice"))).expect("record");
+
+        assert_eq!(sink.min_seq_for("orders.created", Some("carol")), None);
+        assert_eq!(sink.min_seq_for("other.topic", Some("alice")), None);
+        assert_eq!(sink.min_seq_for("orders.created", None), None);
+    }
+}

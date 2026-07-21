@@ -98,7 +98,7 @@ pub enum PhotonError {
 impl PhotonError {
     /// Internal error with a source chain (broker I/O, crypto, etc.).
     ///
-    /// Accepts any [`Display`] value so callers can wrap SDK errors that do not
+    /// Accepts any [`std::fmt::Display`] value so callers can wrap SDK errors that do not
     /// implement [`std::error::Error`] (e.g. some AEAD/crypto error types).
     pub fn caused(
         context: impl Into<String>,
@@ -146,5 +146,81 @@ impl From<anyhow::Error> for PhotonError {
             context: err.to_string(),
             source: Arc::new(DisplayError(format!("{err:#}"))),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error as _;
+
+    use super::*;
+
+    #[derive(Debug, thiserror::Error)]
+    #[error("disk offline")]
+    struct DiskError;
+
+    /// Display-only error type (does not implement `std::error::Error`),
+    /// mimicking SDK types like AEAD crypto errors.
+    struct BadTag;
+
+    impl fmt::Display for BadTag {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.write_str("bad auth tag")
+        }
+    }
+
+    #[test]
+    fn caused_wraps_display_only_source() {
+        let err = PhotonError::caused("decrypt failed", BadTag);
+        assert_eq!(err.to_string(), "internal error: decrypt failed");
+        let source = err.source().expect("caused keeps a source");
+        assert_eq!(source.to_string(), "bad auth tag");
+    }
+
+    #[test]
+    fn caused_error_preserves_source_chain() {
+        let err = PhotonError::caused_error("flush failed", DiskError);
+        assert_eq!(err.to_string(), "internal error: flush failed");
+        // Source is shared behind an Arc (keeps PhotonError Clone), so verify the
+        // chain by display rather than downcast.
+        let source = err.source().expect("caused_error keeps a source");
+        assert_eq!(source.to_string(), "disk offline");
+    }
+
+    #[test]
+    fn persistence_reports_context_and_source() {
+        let err = PhotonError::persistence("sqlite decode", DiskError);
+        assert_eq!(err.to_string(), "persistence error: sqlite decode");
+        let source = err.source().expect("persistence keeps a source");
+        assert_eq!(source.to_string(), "disk offline");
+    }
+
+    #[test]
+    fn anyhow_conversion_keeps_full_chain() {
+        let err = anyhow::Error::new(DiskError).context("flush checkpoint");
+        let err = PhotonError::from(err);
+        assert_eq!(err.to_string(), "internal error: flush checkpoint");
+        let source = err.source().expect("anyhow conversion keeps a source");
+        let chain = source.to_string();
+        assert!(chain.contains("flush checkpoint"), "chain: {chain}");
+        assert!(chain.contains("disk offline"), "chain: {chain}");
+    }
+
+    #[test]
+    fn serde_json_conversion_maps_to_payload_error() {
+        let err = serde_json::from_str::<serde_json::Value>("{").unwrap_err();
+        let err = PhotonError::from(err);
+        assert!(matches!(err, PhotonError::PayloadError(_)));
+    }
+
+    #[test]
+    fn caused_errors_stay_clone() {
+        let err = PhotonError::caused("original", BadTag);
+        let clone = err.clone();
+        assert_eq!(err.to_string(), clone.to_string());
+        assert_eq!(
+            err.source().map(ToString::to_string),
+            clone.source().map(ToString::to_string)
+        );
     }
 }

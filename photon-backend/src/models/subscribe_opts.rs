@@ -156,3 +156,50 @@ impl SubscriptionHandle {
         Self { _private: () }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_ephemeral_has_no_name_or_filter() {
+        let opts = SubscribeOpts::default_ephemeral();
+        assert!(opts.subscription_name.is_none());
+        assert!(opts.topic_key_filter.is_none());
+        assert!(opts.consumer_group.is_none());
+        assert_eq!(opts.mode, SubscriptionMode::Ephemeral);
+    }
+
+    #[test]
+    fn broadcast_is_durable() {
+        let opts = SubscribeOpts::broadcast().subscription_name("worker-a");
+        assert_eq!(opts.mode, SubscriptionMode::Durable);
+        assert_eq!(opts.subscription_name.as_deref(), Some("worker-a"));
+    }
+
+    #[test]
+    fn builder_setters_apply() {
+        let opts = SubscribeOpts::default_ephemeral()
+            .topic_key_filter("alice")
+            .mode(SubscriptionMode::Durable);
+        assert_eq!(opts.topic_key_filter.as_deref(), Some("alice"));
+        assert_eq!(opts.mode, SubscriptionMode::Durable);
+    }
+
+    #[test]
+    fn consumer_group_clears_name_and_filter() {
+        let opts = SubscribeOpts::broadcast()
+            .subscription_name("worker-a")
+            .topic_key_filter("alice")
+            .consumer_group(GroupOpts::new("group-1").shards(8).instance_id("node-2"));
+
+        assert!(opts.subscription_name.is_none());
+        assert!(opts.topic_key_filter.is_none());
+        assert_eq!(opts.mode, SubscriptionMode::Durable);
+
+        let group = opts.consumer_group.expect("group opts set");
+        assert_eq!(group.group_id, "group-1");
+        assert_eq!(group.shard_count, Some(8));
+        assert_eq!(group.instance_id.as_deref(), Some("node-2"));
+    }
+}

@@ -87,7 +87,7 @@ See [`photon-bench/EXPERIMENTS.md`](photon-bench/EXPERIMENTS.md#criterion-microb
 
 ## Coverage
 
-CI `coverage` job remains non-blocking. Soft floor for the scoped mem-tier workspace slice (excludes `photon-e2e` / `photon-bench`) is set as `COVERAGE_FLOOR_PCT` in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Raise that env value deliberately as tests land — do not jump to 90% in one step. Do not commit coverage percentages or “last pass” result tables into docs.
+CI `coverage` job remains non-blocking. The report is scoped to **product code reachable in the mem-tier job**: all workspace tests run (minus `photon-e2e` / `photon-bench`), but the denominator excludes broker adapters (`photon-backend-nats` / `-kafka` / `-fluvio`, exercised by live-broker contract tests in the `e2e` job), `photon-macros` (compile-time code invisible to `llvm-cov`), and the `photon-testkit` harness. The soft floor is `COVERAGE_FLOOR_PCT` in [`.github/workflows/ci.yml`](.github/workflows/ci.yml), enforced via `cargo llvm-cov report --fail-under-lines`. Raise that env value deliberately as tests land; never lower it just to make the job pass. Do not commit coverage percentages or “last pass” result tables into docs.
 
 ## Verification
 

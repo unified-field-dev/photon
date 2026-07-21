@@ -145,17 +145,22 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-llvm-cov
-      - name: Line coverage report (workspace, mem tier)
+      - name: Line coverage report (product crates, mem tier)
         env:
-          # Soft floor (ratchet from ~32% 2026-07-08 baseline). Job is continue-on-error.
-          COVERAGE_FLOOR_PCT: "30"
+          # Soft floor below the current mem-tier measurement of product code (~70%).
+          # Job is continue-on-error; raise this as tests are added, never lower it to pass.
+          COVERAGE_FLOOR_PCT: "65"
         run: |
-          cargo llvm-cov --workspace --exclude photon-e2e --exclude photon-bench --features runtime,mem --summary-only | tee coverage-summary.txt
-          cargo llvm-cov --workspace --exclude photon-e2e --exclude photon-bench --features runtime,mem --lcov --output-path lcov.info
-          # Parse TOTAL line coverage percent from summary (e.g. "TOTAL ... 32.10%").
-          pct=$(awk '/^TOTAL/ { for (i=1;i<=NF;i++) if ($i ~ /%$/) { gsub(/%/,"",$i); print $i; exit } }' coverage-summary.txt)
-          echo "Line coverage TOTAL=${pct}% (floor ${COVERAGE_FLOOR_PCT}%)"
-          awk -v p="$pct" -v f="$COVERAGE_FLOOR_PCT" 'BEGIN { if (p+0 < f+0) { printf("coverage %.2f%% below floor %.2f%%\n", p, f); exit 1 } }'
+          # Report scope: product crates reachable in this job. Excluded from the report
+          # (tests still run): broker adapters (need live brokers; exercised by contract
+          # tests in the e2e job), proc macros (compile-time code invisible to llvm-cov),
+          # and the photon-testkit harness (test scaffolding, not product code).
+          ignore='(photon-testkit|photon-macros|photon-backend-nats|photon-backend-kafka|photon-backend-fluvio)/'
+          cargo llvm-cov --workspace --exclude photon-e2e --exclude photon-bench \
+            --features runtime,mem --no-report
+          cargo llvm-cov report --ignore-filename-regex "$ignore" --lcov --output-path lcov.info
+          cargo llvm-cov report --ignore-filename-regex "$ignore" --summary-only \
+            --fail-under-lines "$COVERAGE_FLOOR_PCT" | tee coverage-summary.txt
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-lcov
