@@ -46,10 +46,6 @@ impl Default for ExecutorController {
 impl ExecutorController {
     /// Spawn subscription loops for every inventory-registered handler.
     ///
-    /// # Panics
-    ///
-    /// Panics if an internal lock is poisoned.
-    ///
     /// # Errors
     ///
     /// Returns an error if the executor was already started on this controller.
@@ -59,11 +55,7 @@ impl ExecutorController {
     /// - Start is one-shot per controller; restart requires a new [`Photon`] build.
     /// - Outer loops respect [`Self::shutdown`]; in-flight handler tasks are awaited in
     ///   [`Self::join`].
-    pub fn start(
-        &self,
-        photon: &Photon,
-        identity: &Arc<dyn IdentityFactory>,
-    ) -> Result<()> {
+    pub fn start(&self, photon: &Photon, identity: &Arc<dyn IdentityFactory>) -> Result<()> {
         if self
             .started
             .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
@@ -90,7 +82,10 @@ impl ExecutorController {
             tasks.push(task);
         }
 
-        *self.tasks.lock().unwrap() = tasks;
+        *self
+            .tasks
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = tasks;
         Ok(())
     }
 
@@ -112,12 +107,13 @@ impl ExecutorController {
     /// - Drains stored outer [`JoinHandle`]s; each loop drains its own in-flight [`JoinSet`]
     ///   before exiting.
     /// - Safe to call when no tasks were started (no-op).
-    ///
-    /// # Panics
-    ///
-    /// Panics if an internal lock is poisoned.
     pub async fn join(&self) {
-        let tasks = std::mem::take(&mut *self.tasks.lock().unwrap());
+        let tasks = std::mem::take(
+            &mut *self
+                .tasks
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner),
+        );
         for task in tasks {
             let _ = task.await;
         }
@@ -181,8 +177,7 @@ fn spawn_group_handler_loop(
             after_seq_by_shard.insert(*shard_id, Some(seq));
         }
 
-        let mut stream =
-            photon.subscribe_consumer_group(topic, &assigned, after_seq_by_shard);
+        let mut stream = photon.subscribe_consumer_group(topic, &assigned, after_seq_by_shard);
         let mut inflight = JoinSet::new();
 
         loop {
@@ -193,7 +188,18 @@ fn spawn_group_handler_loop(
                     let Some(event_result) = event_result else { break };
                     match event_result {
                         Ok(event) => {
-                            let permit = services.worker_pool.acquire().await;
+                            let permit = match services.worker_pool.acquire().await {
+                                Ok(p) => p,
+                                Err(e) => {
+                                    tracing::warn!(
+                                        topic = topic,
+                                        group = group_id,
+                                        error = %e,
+                                        "worker pool acquire failed"
+                                    );
+                                    continue;
+                                }
+                            };
                             let identity = Arc::clone(&identity);
                             let services = Arc::clone(&services);
                             let group = group_id.to_string();
@@ -289,7 +295,18 @@ fn spawn_handler_loop(
                     let Some(event_result) = event_result else { break };
                     match event_result {
                         Ok(event) => {
-                            let permit = services.worker_pool.acquire().await;
+                            let permit = match services.worker_pool.acquire().await {
+                                Ok(p) => p,
+                                Err(e) => {
+                                    tracing::warn!(
+                                        topic = topic,
+                                        subscription = subscription_name,
+                                        error = %e,
+                                        "worker pool acquire failed"
+                                    );
+                                    continue;
+                                }
+                            };
                             let identity = Arc::clone(&identity);
                             let services = Arc::clone(&services);
                             let sub_name = subscription_name.to_string();

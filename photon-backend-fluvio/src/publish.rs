@@ -82,7 +82,7 @@ impl PublishPipeline {
             .clone()
             .acquire_owned()
             .await
-            .map_err(|e| PhotonError::Internal(format!("fluvio publish pipeline: {e}")))?;
+            .map_err(|e| PhotonError::caused("fluvio publish pipeline:", e))?;
 
         let producer = self.producer_for(topic).await?;
         let (key, body) = encode_event_record(event)?;
@@ -91,11 +91,11 @@ impl PublishPipeline {
             let output = producer
                 .send(key, body)
                 .await
-                .map_err(|e| PhotonError::Internal(format!("fluvio publish {topic}: {e}")))?;
+                .map_err(|e| PhotonError::caused(format!("fluvio publish {topic}"), e))?;
             let metadata = output
                 .wait()
                 .await
-                .map_err(|e| PhotonError::Internal(format!("fluvio publish ack {topic}: {e}")))?;
+                .map_err(|e| PhotonError::caused(format!("fluvio publish ack {topic}"), e))?;
             drop(permit);
             Ok(Some(metadata.offset().saturating_add(1)))
         } else {

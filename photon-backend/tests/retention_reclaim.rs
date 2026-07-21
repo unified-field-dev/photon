@@ -1,9 +1,11 @@
 //! Integration tests for in-process retention / reclaim.
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use std::sync::Arc;
 
 use photon_backend::{
-    ExecutorServices, InProcStoragePort, RetentionPolicy, SubscriptionPartition, StoragePort,
+    ExecutorServices, InProcStoragePort, RetentionPolicy, StoragePort, SubscriptionPartition,
     TransportCrypto,
 };
 use serial_test::serial;
@@ -16,9 +18,9 @@ async fn checkpoint_then_sweep_truncates_replay_buffer() {
     std::env::set_var("PHOTON_RETENTION_SWEEP_MS", "0");
     std::env::set_var("PHOTON_TRANSPORT_RETAIN_SEQ", "5");
 
-    let port: Arc<dyn StoragePort> = Arc::new(InProcStoragePort::new(
-        TransportCrypto::from_bytes(*b"photon-dev-transport-key-32bytes"),
-    ));
+    let port: Arc<dyn StoragePort> = Arc::new(InProcStoragePort::new(TransportCrypto::from_bytes(
+        *b"photon-dev-transport-key-32bytes",
+    )));
 
     for i in 0..20 {
         port.append(

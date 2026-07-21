@@ -25,15 +25,16 @@
 //! - **Checkpoints:** KV bucket `photon-checkpoints` (skipped when [`ReplayCursor::TailOnly`]).
 //! - **Replay:** [`ReplayCursor::StreamSeq`] uses `JetStream` stream sequence; [`ReplayCursor::TailOnly`] tails live only.
 
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 mod checkpoint;
 mod config;
-mod consumer;
 mod connect;
+mod consumer;
 mod kv;
-mod publish;
-mod replicas;
 mod message;
 mod port;
+mod publish;
+mod replicas;
 mod retention;
 mod stream;
 pub mod stream_shard;
@@ -43,8 +44,8 @@ pub use config::{
     NatsConfig, NatsStoragePortBuilder, ReplayCursor, MAX_INFLIGHT_ENV, REPLAY_CURSOR_ENV,
     STREAM_ENV, SYNC_ACK_ENV, URL_ENV,
 };
-pub use stream_shard::STREAM_SHARDS_ENV;
 pub use consumer::{deliver_subject_for, durable_consumer_name};
-pub use replicas::REPLICAS_ENV;
 pub use port::{nats_url_from_env, NatsStoragePort};
+pub use replicas::REPLICAS_ENV;
 pub use retention::RETENTION_ENV;
+pub use stream_shard::STREAM_SHARDS_ENV;

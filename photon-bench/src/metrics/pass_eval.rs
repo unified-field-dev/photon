@@ -86,11 +86,13 @@ fn eval_pb3(ctx: &PassContext) -> bool {
 }
 
 fn eval_pb4(ctx: &PassContext) -> bool {
-    ctx.load.is_some_and(|l| l.error_rate < 0.001 && l.achieved_ops_per_sec > 0.0)
+    ctx.load
+        .is_some_and(|l| l.error_rate < 0.001 && l.achieved_ops_per_sec > 0.0)
 }
 
 fn eval_pb5(ctx: &PassContext) -> bool {
-    ctx.load.is_some_and(|l| l.error_rate < 0.01 && l.achieved_ops_per_sec > 0.0)
+    ctx.load
+        .is_some_and(|l| l.error_rate < 0.01 && l.achieved_ops_per_sec > 0.0)
 }
 
 fn eval_pf0(ctx: &PassContext) -> bool {
@@ -127,9 +129,7 @@ fn eval_p0(ctx: &PassContext) -> bool {
     let Some(p) = &ctx.publish_ms else {
         return false;
     };
-    let slope_ok = ctx
-        .slope
-        .is_none_or(|s| s.slope.abs() < 0.01);
+    let slope_ok = ctx.slope.is_none_or(|s| s.slope.abs() < 0.01);
     p.p50 > 0.0 && p.p95 / p.p50.max(f64::EPSILON) < 10.0 && slope_ok
 }
 
@@ -186,8 +186,7 @@ fn eval_p9(ctx: &PassContext) -> bool {
 }
 
 fn eval_pl(ctx: &PassContext) -> bool {
-    ctx.load
-        .is_some_and(|l| l.error_rate < 0.001)
+    ctx.load.is_some_and(|l| l.error_rate < 0.001)
 }
 
 fn eval_pg(ctx: &PassContext) -> bool {
@@ -200,8 +199,7 @@ fn eval_pg2(ctx: &PassContext) -> bool {
 }
 
 fn eval_pfs(ctx: &PassContext) -> bool {
-    ctx.load.is_some_and(|l| l.error_rate < 0.001)
-        && ctx.subscriber_count.is_some_and(|n| n > 0)
+    ctx.load.is_some_and(|l| l.error_rate < 0.001) && ctx.subscriber_count.is_some_and(|n| n > 0)
 }
 
 fn eval_pfe(ctx: &PassContext) -> bool {

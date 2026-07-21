@@ -8,6 +8,7 @@
 //! Attribute tables: [`photon::config`](https://docs.rs/uf-photon/latest/photon/config/).
 //! Getting started: [declare topics](https://docs.rs/uf-photon/latest/photon/#3-declare-topics-and-handlers).
 
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 use proc_macro::TokenStream;
 
 mod subscribe;

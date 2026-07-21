@@ -1,5 +1,7 @@
 //! Integration test: topic registry returns `TopicNotFound` for unknown topics.
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use photon_backend::{PhotonError, TopicRegistry};
 
 #[test]

@@ -18,7 +18,11 @@ pub struct ProjectionInputs {
     pub p6_delivery_p99_ms: Option<f64>,
 }
 
-pub fn load_from_dir(reports_dir: &Path, hardware: &str, storage: &str) -> Result<ProjectionInputs> {
+pub fn load_from_dir(
+    reports_dir: &Path,
+    hardware: &str,
+    storage: &str,
+) -> Result<ProjectionInputs> {
     let mut inputs = ProjectionInputs {
         hardware: hardware.into(),
         storage: storage.into(),
@@ -41,11 +45,23 @@ pub fn load_from_dir(reports_dir: &Path, hardware: &str, storage: &str) -> Resul
         let id = v.get("experiment").and_then(|e| e.as_str()).unwrap_or("");
         match id {
             "bm-p0" => {
-                inputs.p0_rate = v.get("achieved_ops_per_sec").and_then(serde_json::Value::as_f64);
+                inputs.p0_rate = v
+                    .get("achieved_ops_per_sec")
+                    .and_then(serde_json::Value::as_f64);
             }
-            "bm-pl1" => inputs.pl1_rate = v.get("achieved_ops_per_sec").and_then(serde_json::Value::as_f64),
-            "bm-pl2" => inputs.pl2_rate = v.get("achieved_ops_per_sec").and_then(serde_json::Value::as_f64),
-            "bm-p3" => inputs.backlog_peak = v.get("backlog_peak").and_then(serde_json::Value::as_u64),
+            "bm-pl1" => {
+                inputs.pl1_rate = v
+                    .get("achieved_ops_per_sec")
+                    .and_then(serde_json::Value::as_f64);
+            }
+            "bm-pl2" => {
+                inputs.pl2_rate = v
+                    .get("achieved_ops_per_sec")
+                    .and_then(serde_json::Value::as_f64);
+            }
+            "bm-p3" => {
+                inputs.backlog_peak = v.get("backlog_peak").and_then(serde_json::Value::as_u64);
+            }
             "bm-p8" | "bm-pl0" | "bm-pl3" => {
                 let err = v.get("error_rate").and_then(serde_json::Value::as_f64);
                 if err.is_some() {
@@ -53,8 +69,10 @@ pub fn load_from_dir(reports_dir: &Path, hardware: &str, storage: &str) -> Resul
                 }
             }
             "bm-p6" => {
-                inputs.p6_delivery_p99_ms =
-                    v.get("delivery_wait_ms").and_then(|d| d.get("p99")).and_then(serde_json::Value::as_f64);
+                inputs.p6_delivery_p99_ms = v
+                    .get("delivery_wait_ms")
+                    .and_then(|d| d.get("p99"))
+                    .and_then(serde_json::Value::as_f64);
             }
             _ => {}
         }

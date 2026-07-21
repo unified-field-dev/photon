@@ -146,9 +146,16 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - name: Line coverage report (workspace, mem tier)
+        env:
+          # Soft floor (ratchet from ~32% 2026-07-08 baseline). Job is continue-on-error.
+          COVERAGE_FLOOR_PCT: "30"
         run: |
-          cargo llvm-cov --workspace --exclude photon-e2e --exclude photon-bench --features runtime,mem --summary-only
+          cargo llvm-cov --workspace --exclude photon-e2e --exclude photon-bench --features runtime,mem --summary-only | tee coverage-summary.txt
           cargo llvm-cov --workspace --exclude photon-e2e --exclude photon-bench --features runtime,mem --lcov --output-path lcov.info
+          # Parse TOTAL line coverage percent from summary (e.g. "TOTAL ... 32.10%").
+          pct=$(awk '/^TOTAL/ { for (i=1;i<=NF;i++) if ($i ~ /%$/) { gsub(/%/,"",$i); print $i; exit } }' coverage-summary.txt)
+          echo "Line coverage TOTAL=${pct}% (floor ${COVERAGE_FLOOR_PCT}%)"
+          awk -v p="$pct" -v f="$COVERAGE_FLOOR_PCT" 'BEGIN { if (p+0 < f+0) { printf("coverage %.2f%% below floor %.2f%%\n", p, f); exit 1 } }'
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-lcov

@@ -44,6 +44,7 @@ impl CheckpointCoalescer {
                 ticker.tick().await;
                 let reclaimer = task_reclaimer.get().cloned();
                 if let Err(e) = flush_map(&task_port, &task_pending, reclaimer).await {
+                    tracing::warn!(error = %e, "checkpoint coalescer flush failed");
                     crate::instrumentation::log_ops(
                         "checkpoint",
                         "coalescer_flush",
@@ -135,6 +136,7 @@ impl CheckpointCoalescer {
     }
 }
 
+#[tracing::instrument(name = "photon.checkpoint.flush", skip_all)]
 async fn flush_map(
     port: &Arc<dyn StoragePort>,
     pending: &Mutex<HashMap<CoalesceKey, i64>>,

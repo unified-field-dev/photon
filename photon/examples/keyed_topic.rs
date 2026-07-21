@@ -5,7 +5,7 @@
 //! Requires `PHOTON_TRANSPORT_KEY` (see `docs/configuration.md`).
 #![allow(missing_docs)]
 #![allow(clippy::unused_async)]
-
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::time::Duration;
 
 use futures::StreamExt;
@@ -20,9 +20,7 @@ pub struct OrderPlaced {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     let photon = Photon::builder().auto_registry().build()?;
 

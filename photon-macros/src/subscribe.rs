@@ -78,9 +78,7 @@ enum InjectableKind {
 }
 
 fn path_ends_with(path: &syn::Path, name: &str) -> bool {
-    path.segments
-        .last()
-        .is_some_and(|seg| seg.ident == name)
+    path.segments.last().is_some_and(|seg| seg.ident == name)
 }
 
 fn type_ends_with(ty: &Type, name: &str) -> bool {
@@ -149,10 +147,7 @@ fn classify_injectable(ty: &Type) -> Option<InjectableKind> {
     }
 }
 
-fn actor_binding_tokens(
-    binding: &ActorBinding<'_>,
-    actor_pat: &Pat,
-) -> proc_macro2::TokenStream {
+fn actor_binding_tokens(binding: &ActorBinding<'_>, actor_pat: &Pat) -> proc_macro2::TokenStream {
     match binding {
         ActorBinding::BoxDyn => quote! {
             let #actor_pat = identity
@@ -240,13 +235,25 @@ pub fn subscribe_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
     }
 
     let fn_name = &fn_item.sig.ident;
-    let invoke_name = Ident::new(
-        &format!("__photon_subscribe_{fn_name}"),
-        fn_name.span(),
-    );
+    let invoke_name = Ident::new(&format!("__photon_subscribe_{fn_name}"), fn_name.span());
 
-    let actor_arg = fn_item.sig.inputs.first().unwrap();
-    let event_arg = fn_item.sig.inputs.iter().nth(1).unwrap();
+    // Length checked above (`inputs.len() < 2`).
+    let Some(actor_arg) = fn_item.sig.inputs.first() else {
+        return syn::Error::new_spanned(
+            fn_item.sig.ident,
+            "#[photon::subscribe] handlers require (actor, event) parameters",
+        )
+        .to_compile_error()
+        .into();
+    };
+    let Some(event_arg) = fn_item.sig.inputs.iter().nth(1) else {
+        return syn::Error::new_spanned(
+            fn_item.sig.ident,
+            "#[photon::subscribe] handlers require (actor, event) parameters",
+        )
+        .to_compile_error()
+        .into();
+    };
 
     let (actor_pat, actor_ty) = match actor_arg {
         FnArg::Typed(pat_type) => (&pat_type.pat, &pat_type.ty),
@@ -381,11 +388,7 @@ pub fn subscribe_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
             .shards
             .as_ref()
             .map_or_else(|| quote! { None }, |s| quote! { Some(#s as u32) });
-        let registry_key = format!(
-            "{}:group:{}",
-            topic_lit.value(),
-            group_lit.value()
-        );
+        let registry_key = format!("{}:group:{}", topic_lit.value(), group_lit.value());
         let registry_key_lit = LitStr::new(&registry_key, topic_lit.span());
         quote! {
             photon::HandlerDescriptor::new_group(
@@ -397,7 +400,15 @@ pub fn subscribe_impl(attr: TokenStream, item: TokenStream) -> TokenStream {
             )
         }
     } else {
-        let durable_lit = attrs.durable.as_ref().unwrap();
+        // `durable` required when `group` is absent (checked above).
+        let Some(durable_lit) = attrs.durable.as_ref() else {
+            return syn::Error::new_spanned(
+                fn_item.sig.ident,
+                "#[photon::subscribe] requires either `durable = \"...\"` or `group = \"...\"`",
+            )
+            .to_compile_error()
+            .into();
+        };
         let registry_key = format!("{}:{}", topic_lit.value(), durable_lit.value());
         let registry_key_lit = LitStr::new(&registry_key, topic_lit.span());
         quote! {

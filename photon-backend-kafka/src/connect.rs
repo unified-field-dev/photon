@@ -28,7 +28,7 @@ pub async fn connect_kafka(config: &KafkaConfig) -> Result<SharedClient> {
     let client = ClientBuilder::new(brokers)
         .build()
         .await
-        .map_err(|e| PhotonError::Internal(format!("kafka connect {}: {e}", config.brokers)))?;
+        .map_err(|e| PhotonError::caused(format!("kafka connect {}", config.brokers), e))?;
     Ok(Arc::new(client))
 }
 

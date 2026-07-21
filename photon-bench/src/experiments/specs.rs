@@ -99,7 +99,13 @@ fn build_p4(id: &str, ops: Option<u32>) -> ExperimentPlan {
 }
 
 fn build_p5(id: &str, _ops: Option<u32>) -> ExperimentPlan {
-    plan(id, ScenarioSpec::keyed_filter_cardinality(), None, None, None)
+    plan(
+        id,
+        ScenarioSpec::keyed_filter_cardinality(),
+        None,
+        None,
+        None,
+    )
 }
 
 fn build_p6(id: &str, _ops: Option<u32>) -> ExperimentPlan {

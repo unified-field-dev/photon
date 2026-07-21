@@ -109,7 +109,9 @@ mod tests {
             topic_prefix: "photon".into(),
             retention: std::time::Duration::from_mins(15),
             replicas: 1,
-            crypto: photon_backend::TransportCrypto::from_bytes(*b"photon-dev-transport-key-32bytes"),
+            crypto: photon_backend::TransportCrypto::from_bytes(
+                *b"photon-dev-transport-key-32bytes",
+            ),
             replay_cursor: crate::config::ReplayCursor::StreamSeq,
             sync_ack: true,
             max_inflight: 1,
@@ -125,7 +127,9 @@ mod tests {
             topic_prefix: "photon".into(),
             retention: std::time::Duration::from_mins(15),
             replicas: 1,
-            crypto: photon_backend::TransportCrypto::from_bytes(*b"photon-dev-transport-key-32bytes"),
+            crypto: photon_backend::TransportCrypto::from_bytes(
+                *b"photon-dev-transport-key-32bytes",
+            ),
             replay_cursor: crate::config::ReplayCursor::StreamSeq,
             sync_ack: true,
             max_inflight: 1,

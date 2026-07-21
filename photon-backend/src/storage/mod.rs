@@ -21,10 +21,10 @@
 //!
 //! See also: [`crate::checkpoint`], [`crate::retention`], [`crate::backend`].
 
-mod partition;
 mod in_proc;
+mod partition;
 mod port;
 
 pub use in_proc::InProcStoragePort;
-pub use port::{StorageCapabilities, StoragePort};
 pub use partition::topic_filter_matches;
+pub use port::{StorageCapabilities, StoragePort};

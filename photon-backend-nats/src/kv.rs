@@ -18,6 +18,6 @@ pub async fn ensure_kv_bucket(jetstream: &jetstream::Context, bucket: &str) -> R
                 ..Default::default()
             })
             .await
-            .map_err(|e| PhotonError::Internal(format!("nats create kv bucket {bucket}: {e}"))),
+            .map_err(|e| PhotonError::caused(format!("nats create kv bucket {bucket}"), e)),
     }
 }

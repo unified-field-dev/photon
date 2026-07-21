@@ -51,12 +51,15 @@ fn read_os_string() -> String {
         .arg("-sr")
         .output()
         .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok()).map_or_else(|| "unknown".into(), |s| s.trim().to_string());
+        .and_then(|o| String::from_utf8(o.stdout).ok())
+        .map_or_else(|| "unknown".into(), |s| s.trim().to_string());
     if let Ok(rel) = std::fs::read_to_string("/etc/os-release") {
         let pretty = rel
             .lines()
             .find(|l| l.starts_with("PRETTY_NAME="))
-            .map_or("", |l| l.trim_start_matches("PRETTY_NAME=").trim_matches('"'));
+            .map_or("", |l| {
+                l.trim_start_matches("PRETTY_NAME=").trim_matches('"')
+            });
         if !pretty.is_empty() {
             return format!("{uname} ({pretty})");
         }

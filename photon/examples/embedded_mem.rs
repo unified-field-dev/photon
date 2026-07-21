@@ -6,12 +6,10 @@
 //! `cGhvdG9uLWRldi10cmFuc3BvcnQta2V5LTMyYnl0ZXM=` (dev key). See `docs/configuration.md`.
 #![allow(missing_docs)]
 #![allow(clippy::unused_async, clippy::used_underscore_binding)]
-
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::sync::Arc;
 
-use photon::{
-    subscribe, topic, JsonIdentityFactory, Photon, Actor,
-};
+use photon::{subscribe, topic, Actor, JsonIdentityFactory, Photon};
 
 // Step 1 — Define a typed topic (registers metadata via inventory).
 #[topic(name = "examples.greeting", keyed_by = "name")]
@@ -29,9 +27,7 @@ async fn on_greeting(_actor: Box<dyn Actor>, event: GreetingSent) -> photon::Res
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     // Step 3 — Boot: build runtime, start executor. Keep the handle (handle-first).
     // Optional sugar: configure(photon) enables .publish() without an explicit handle.

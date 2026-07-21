@@ -69,7 +69,9 @@ pub fn broker_nodes_for_targets(points: &[ScalingPoint]) -> HashMap<String, u64>
                 .partial_cmp(&b.peak_ops_per_sec)
                 .unwrap_or(std::cmp::Ordering::Equal)
         })
-        .map_or(0.0, |p| p.peak_ops_per_sec / f64::from(p.broker_nodes.max(1)));
+        .map_or(0.0, |p| {
+            p.peak_ops_per_sec / f64::from(p.broker_nodes.max(1))
+        });
 
     TARGETS
         .iter()

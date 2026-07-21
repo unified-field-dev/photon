@@ -1,8 +1,8 @@
 //! Compose [`AdminSnapshot`] from registries and storage checkpoint reads.
 
 use photon_backend::{
-    BackendCapabilities, HandlerDescriptor, HandlerRegistry, ShardConfig, TopicDescriptor,
-    shard_storage_key,
+    shard_storage_key, BackendCapabilities, HandlerDescriptor, HandlerRegistry, ShardConfig,
+    TopicDescriptor,
 };
 
 use crate::Photon;

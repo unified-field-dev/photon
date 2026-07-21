@@ -16,8 +16,7 @@ use photon_backend::{
 use crate::executor::ExecutorController;
 use crate::{Photon, PhotonRuntimeState};
 
-type BackendInstallFn =
-    Box<dyn FnOnce(BackendContext) -> Result<Arc<dyn PhotonBackend>> + Send>;
+type BackendInstallFn = Box<dyn FnOnce(BackendContext) -> Result<Arc<dyn PhotonBackend>> + Send>;
 
 /// Builder for constructing [`Photon`] runtimes.
 ///

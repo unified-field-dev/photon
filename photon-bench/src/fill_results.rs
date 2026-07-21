@@ -18,13 +18,16 @@ pub fn fill_results(reports_dir: &Path) -> Result<()> {
         }
         let text = std::fs::read_to_string(&path)?;
         let v: serde_json::Value = serde_json::from_str(&text)?;
-        let experiment = v
-            .get("experiment")
-            .and_then(|e| e.as_str())
-            .unwrap_or("");
-        let pass = v.get("pass").and_then(serde_json::Value::as_bool).unwrap_or(false);
+        let experiment = v.get("experiment").and_then(|e| e.as_str()).unwrap_or("");
+        let pass = v
+            .get("pass")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(false);
         let status = v.get("status").and_then(|s| s.as_str()).unwrap_or("?");
-        let snippet = format!("{status} pass={pass} ({})", path.file_name().unwrap().to_string_lossy());
+        let snippet = format!(
+            "{status} pass={pass} ({})",
+            path.file_name().unwrap().to_string_lossy()
+        );
         let needle = format!("| **{experiment}** |");
         if let Some(line_start) = body.find(&needle) {
             if let Some(line_end) = body[line_start..].find('\n') {
@@ -32,11 +35,7 @@ pub fn fill_results(reports_dir: &Path) -> Result<()> {
                 if line.contains("| Results |") || line.matches('|').count() >= 6 {
                     let parts: Vec<_> = line.split('|').collect();
                     if parts.len() >= 7 {
-                        let new_line = format!(
-                            "{}| {} |",
-                            parts[..6].join("|"),
-                            snippet
-                        );
+                        let new_line = format!("{}| {} |", parts[..6].join("|"), snippet);
                         body.replace_range(line_start..line_start + line_end, &new_line);
                         updated += 1;
                     }

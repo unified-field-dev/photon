@@ -1,21 +1,21 @@
 //! Live Fluvio integration tests (require `PHOTON_FLUVIO_ENDPOINT`).
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::time::Duration;
 
 use std::sync::Arc;
 
 use futures::StreamExt;
 use photon_backend::{StoragePort, TransportCrypto};
-use photon_backend_fluvio::{consumer_group_for, durable_consumer_name, FluvioStoragePort, ReplayCursor};
+use photon_backend_fluvio::{
+    consumer_group_for, durable_consumer_name, FluvioStoragePort, ReplayCursor,
+};
 
 fn fluvio_available() -> bool {
     std::env::var("PHOTON_FLUVIO_ENDPOINT").is_ok()
 }
 
-async fn wait_for_event_ids(
-    seen: &Arc<tokio::sync::Mutex<Vec<String>>>,
-    expected: &str,
-) {
+async fn wait_for_event_ids(seen: &Arc<tokio::sync::Mutex<Vec<String>>>, expected: &str) {
     let deadline = tokio::time::Instant::now() + Duration::from_secs(20);
     while tokio::time::Instant::now() < deadline {
         if seen.lock().await.iter().any(|id| id == expected) {

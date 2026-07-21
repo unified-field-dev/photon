@@ -7,9 +7,7 @@ use async_trait::async_trait;
 
 use super::config::RetentionPolicy;
 use super::hook::{PartitionReclaim, RetentionHook};
-use super::partition::{
-    known_subscriptions, merge_partitions, TopicPartition,
-};
+use super::partition::{known_subscriptions, merge_partitions, TopicPartition};
 use super::watermark::{
     compute_watermarks, merge_truncate_bound, truncate_before_arg, WatermarkContext,
 };
@@ -86,6 +84,7 @@ fn start_background_sweep(reclaimer: Arc<RetentionReclaimer>) {
         loop {
             ticker.tick().await;
             if let Err(e) = reclaimer.sweep_all().await {
+                tracing::warn!(error = %e, "background retention sweep failed");
                 log_ops(
                     "retention",
                     "sweep",
@@ -105,6 +104,7 @@ impl RetentionReclaimer {
     /// # Errors
     ///
     /// Returns an error if the operation fails.
+    #[tracing::instrument(name = "photon.retention.sweep_partition", skip(self), fields(topic, topic_key = ?topic_key))]
     pub async fn sweep_partition(
         &self,
         topic: &str,
@@ -171,7 +171,10 @@ impl RetentionReclaimer {
     /// # Errors
     ///
     /// Returns an error if the operation fails.
-    pub async fn sweep_partitions(&self, partitions: &[TopicPartition]) -> Result<Vec<ReclaimReport>> {
+    pub async fn sweep_partitions(
+        &self,
+        partitions: &[TopicPartition],
+    ) -> Result<Vec<ReclaimReport>> {
         let mut reports = Vec::with_capacity(partitions.len());
         for part in partitions {
             match self

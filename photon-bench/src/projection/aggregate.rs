@@ -20,7 +20,10 @@ struct CellKey {
 
 fn cell_key(v: &Value) -> Option<CellKey> {
     let dims = v.get("dimensions")?;
-    let aggregate = dims.get("aggregate").and_then(Value::as_bool).unwrap_or(false);
+    let aggregate = dims
+        .get("aggregate")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
     if aggregate {
         return None;
     }
@@ -28,8 +31,12 @@ fn cell_key(v: &Value) -> Option<CellKey> {
         broker_nodes: dims
             .get("broker_nodes")
             .and_then(Value::as_u64)
-            .unwrap_or_else(|| v.get("node_count").and_then(Value::as_u64).unwrap_or(1)) as u32,
-        stream_shards: dims.get("stream_shards").and_then(Value::as_u64).unwrap_or(1) as u32,
+            .unwrap_or_else(|| v.get("node_count").and_then(Value::as_u64).unwrap_or(1))
+            as u32,
+        stream_shards: dims
+            .get("stream_shards")
+            .and_then(Value::as_u64)
+            .unwrap_or(1) as u32,
         replay_cursor: dims
             .get("replay_cursor")
             .and_then(Value::as_str)
@@ -80,11 +87,7 @@ struct AggregateFilters<'a> {
     cell_prefix: Option<&'a str>,
 }
 
-fn should_include_aggregate_report(
-    fname: &str,
-    v: &Value,
-    filters: &AggregateFilters<'_>,
-) -> bool {
+fn should_include_aggregate_report(fname: &str, v: &Value, filters: &AggregateFilters<'_>) -> bool {
     if fname.contains("-aggregate-") {
         return false;
     }
@@ -223,10 +226,7 @@ pub fn aggregate_pfh(
     let groups = walk_pfh_reports(reports_dir, &filters)?;
 
     if groups.is_empty() {
-        bail!(
-            "no per-client BM-PFH reports in {}",
-            reports_dir.display()
-        );
+        bail!("no per-client BM-PFH reports in {}", reports_dir.display());
     }
 
     write_aggregate_reports(groups, out_dir)
@@ -264,12 +264,14 @@ mod tests {
     fn aggregate_sums_clients() {
         let dir = TempDir::new().unwrap();
         let mut f0 = std::fs::File::create(
-            dir.path().join("bm-pfh-nats-n4-sh4-bc2-i0-stream_seq-ack1-p256-r100000-aws.json"),
+            dir.path()
+                .join("bm-pfh-nats-n4-sh4-bc2-i0-stream_seq-ack1-p256-r100000-aws.json"),
         )
         .unwrap();
         write!(f0, "{}", client_report(0, 2, 90000.0)).unwrap();
         let mut f1 = std::fs::File::create(
-            dir.path().join("bm-pfh-nats-n4-sh4-bc2-i1-stream_seq-ack1-p256-r100000-aws.json"),
+            dir.path()
+                .join("bm-pfh-nats-n4-sh4-bc2-i1-stream_seq-ack1-p256-r100000-aws.json"),
         )
         .unwrap();
         write!(f1, "{}", client_report(1, 2, 85000.0)).unwrap();

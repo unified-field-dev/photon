@@ -5,12 +5,10 @@
 //! Requires `PHOTON_TRANSPORT_KEY` (see `docs/configuration.md`).
 #![allow(missing_docs)]
 #![allow(clippy::unused_async, clippy::used_underscore_binding)]
-
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::sync::Arc;
 
-use photon::{
-    subscribe, topic, Actor, ConsoleOpsLog, JsonIdentityFactory, Photon,
-};
+use photon::{subscribe, topic, Actor, ConsoleOpsLog, JsonIdentityFactory, Photon};
 
 #[topic(name = "examples.telemetry.demo")]
 pub struct DemoEvent {
@@ -25,9 +23,7 @@ async fn on_demo(_actor: Box<dyn Actor>, event: DemoEvent) -> photon::Result<()>
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     // ops_log installs before build — publish/handler paths emit self-metrics.
     let photon = Photon::builder()

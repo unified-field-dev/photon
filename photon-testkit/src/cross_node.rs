@@ -86,12 +86,7 @@ pub async fn run_cross_node_fanout_lab(
     let start = Instant::now();
     for i in 0..FANOUT_PUBLISH_COUNT {
         publisher
-            .publish(
-                topic,
-                None,
-                smoke_actor_json(),
-                serde_json::json!({"i": i}),
-            )
+            .publish(topic, None, smoke_actor_json(), serde_json::json!({"i": i}))
             .await?;
     }
 

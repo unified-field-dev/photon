@@ -1,8 +1,6 @@
 //! Matrix smoke — bootstrap + scenario wiring (full Photon runtime in Phase 5).
 
-use photon_testkit::{
-    BootstrapSession, MatrixSpec, ScenarioSpec, StubIdentityFactory,
-};
+use photon_testkit::{BootstrapSession, MatrixSpec, ScenarioSpec, StubIdentityFactory};
 
 #[test]
 fn matrix_ci_mem_embedded_bootstrap_installs() {

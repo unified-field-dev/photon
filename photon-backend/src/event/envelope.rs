@@ -79,10 +79,10 @@ impl TransportCrypto {
             Ok(crypto) => Ok(crypto),
             Err(env_err) => {
                 if allow_dev_transport_key() {
-                    eprintln!(
-                        "WARNING: Photon is using the hard-coded development transport key \
-                         ({ALLOW_DEV_KEY_ENV} is set). Do not use this in production. \
-                         Set {KEY_ENV} to a base64-encoded 32-byte key instead."
+                    tracing::warn!(
+                        env = ALLOW_DEV_KEY_ENV,
+                        key_env = KEY_ENV,
+                        "Photon is using the hard-coded development transport key; do not use in production"
                     );
                     Ok(Self::from_bytes(DEV_KEY))
                 } else {
@@ -93,9 +93,9 @@ impl TransportCrypto {
     }
 
     fn from_base64(s: &str) -> Result<Self> {
-        let bytes = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, s)
-            .map_err(|e| {
-                PhotonError::Internal(format!("{KEY_ENV} is not valid standard base64: {e}"))
+        let bytes =
+            base64::Engine::decode(&base64::engine::general_purpose::STANDARD, s).map_err(|e| {
+                PhotonError::caused(format!("{KEY_ENV} is not valid standard base64"), e)
             })?;
         if bytes.len() != 32 {
             return Err(PhotonError::Internal(format!(
@@ -149,12 +149,12 @@ impl TransportCrypto {
 
     fn seal(&self, plaintext: &[u8]) -> Result<Vec<u8>> {
         let cipher = XChaCha20Poly1305::new_from_slice(self.key.as_slice())
-            .map_err(|e| PhotonError::Internal(e.to_string()))?;
+            .map_err(|e| PhotonError::caused("transport seal key", e))?;
         let mut nonce = [0u8; 24];
         OsRng.fill_bytes(&mut nonce);
         let ct = cipher
             .encrypt(XNonce::from_slice(&nonce), plaintext)
-            .map_err(|e| PhotonError::Internal(e.to_string()))?;
+            .map_err(|e| PhotonError::caused("transport seal encrypt", e))?;
         let mut out = Vec::with_capacity(24 + ct.len());
         out.extend_from_slice(&nonce);
         out.extend_from_slice(&ct);
@@ -169,10 +169,10 @@ impl TransportCrypto {
         }
         let (nonce, ct) = ciphertext.split_at(24);
         let cipher = XChaCha20Poly1305::new_from_slice(self.key.as_slice())
-            .map_err(|e| PhotonError::Internal(e.to_string()))?;
+            .map_err(|e| PhotonError::caused("transport open key", e))?;
         cipher
             .decrypt(XNonce::from_slice(nonce), ct)
-            .map_err(|e| PhotonError::PayloadError(e.to_string()))
+            .map_err(|e| PhotonError::caused("transport open decrypt", e))
     }
 }
 

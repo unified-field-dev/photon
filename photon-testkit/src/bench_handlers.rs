@@ -4,8 +4,8 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use photon_backend::{HandlerDescriptor, Result};
 use photon_backend::models::Event;
+use photon_backend::{HandlerDescriptor, Result};
 use photon_core::IdentityFactory;
 
 /// Topic used by executor fixture scenarios.
@@ -25,10 +25,7 @@ pub fn executor_invocation_count() -> u32 {
 }
 
 #[allow(clippy::unused_async)] // HandlerInvoker requires async fn signature
-async fn dispatch_testkit_executor(
-    _factory: &dyn IdentityFactory,
-    _event: &Event,
-) -> Result<()> {
+async fn dispatch_testkit_executor(_factory: &dyn IdentityFactory, _event: &Event) -> Result<()> {
     EXECUTOR_INVOCATIONS.fetch_add(1, Ordering::SeqCst);
     Ok(())
 }

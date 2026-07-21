@@ -30,6 +30,7 @@ rand_core = { version = "0.6", optional = true }
 zeroize = { version = "1", optional = true }
 base64 = { version = "0.22", optional = true }
 dashmap = { version = "6", optional = true }
+tracing = { workspace = true, optional = true }
 
 [features]
 default = []
@@ -47,6 +48,7 @@ runtime = [
     "dep:zeroize",
     "dep:base64",
     "dep:dashmap",
+    "dep:tracing",
 ]
 mem = ["runtime"]
 

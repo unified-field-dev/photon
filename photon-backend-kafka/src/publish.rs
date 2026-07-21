@@ -45,17 +45,13 @@ impl PublishPipeline {
             .clone()
             .acquire_owned()
             .await
-            .map_err(|e| PhotonError::Internal(format!("kafka publish pipeline: {e}")))?;
+            .map_err(|e| PhotonError::caused("kafka publish pipeline:", e))?;
 
         let partition_client = self
             .client
-            .partition_client(
-                topic.to_string(),
-                0,
-                UnknownTopicHandling::Retry,
-            )
+            .partition_client(topic.to_string(), 0, UnknownTopicHandling::Retry)
             .await
-            .map_err(|e| PhotonError::Internal(format!("kafka partition client {topic}: {e}")))?;
+            .map_err(|e| PhotonError::caused(format!("kafka partition client {topic}"), e))?;
 
         let (record, _) = encode_event_record(event, Utc::now())?;
 
@@ -63,13 +59,11 @@ impl PublishPipeline {
             partition_client
                 .produce(vec![record], Compression::default())
                 .await
-                .map_err(|e| PhotonError::Internal(format!("kafka publish {topic}: {e}")))?;
+                .map_err(|e| PhotonError::caused(format!("kafka publish {topic}"), e))?;
             let high_watermark = partition_client
                 .get_offset(OffsetAt::Latest)
                 .await
-                .map_err(|e| {
-                    PhotonError::Internal(format!("kafka publish watermark {topic}: {e}"))
-                })?;
+                .map_err(|e| PhotonError::caused(format!("kafka publish watermark {topic}"), e))?;
             drop(permit);
             Ok(Some(high_watermark))
         } else {

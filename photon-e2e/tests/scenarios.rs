@@ -1,9 +1,7 @@
 //! Scenario correctness tests over the CI matrix slice.
 #![allow(unused_macros)]
 
-use photon_testkit::{
-    BootstrapSession, MatrixSpec, RunMode, ScenarioRunner, ScenarioSpec,
-};
+use photon_testkit::{BootstrapSession, MatrixSpec, RunMode, ScenarioRunner, ScenarioSpec};
 
 async fn run_scenario_sync(matrix: MatrixSpec, spec: ScenarioSpec) {
     let mut session = BootstrapSession::new(matrix);
@@ -11,13 +9,15 @@ async fn run_scenario_sync(matrix: MatrixSpec, spec: ScenarioSpec) {
     run_scenario_on_session(&session, spec).await;
 }
 
-#[cfg(any(feature = "nats", feature = "kafka", feature = "fluvio", feature = "sqlite"))]
+#[cfg(any(
+    feature = "nats",
+    feature = "kafka",
+    feature = "fluvio",
+    feature = "sqlite"
+))]
 async fn run_scenario_async(matrix: MatrixSpec, spec: ScenarioSpec) {
     let mut session = BootstrapSession::new(matrix);
-    session
-        .install_async()
-        .await
-        .expect("async bootstrap");
+    session.install_async().await.expect("async bootstrap");
     run_scenario_on_session(&session, spec).await;
 }
 

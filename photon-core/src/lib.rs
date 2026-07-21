@@ -9,6 +9,8 @@
 //! - [`JsonIdentityFactory`] / [`JsonActor`] — JSON stubs for tests and examples
 //! - [`IdentityError`] — identity port failures
 
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
+
 pub mod error;
 pub mod identity;
 pub mod stub_identity;

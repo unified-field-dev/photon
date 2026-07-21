@@ -61,6 +61,6 @@ async fn ensure_one_stream(
             ..Default::default()
         })
         .await
-        .map_err(|e| PhotonError::Internal(format!("nats ensure stream {name}: {e}")))?;
+        .map_err(|e| PhotonError::caused(format!("nats ensure stream {name}"), e))?;
     Ok(())
 }

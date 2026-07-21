@@ -1,6 +1,6 @@
 //! In-memory [`OpsLog`] for tests (`feature = "recording"`).
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
 use serde_json::Value;
 
@@ -50,6 +50,10 @@ pub struct RecordingOpsLog {
     inner: Arc<Mutex<Inner>>,
 }
 
+fn lock_inner(inner: &Mutex<Inner>) -> MutexGuard<'_, Inner> {
+    inner.lock().unwrap_or_else(PoisonError::into_inner)
+}
+
 impl RecordingOpsLog {
     /// Create an empty recording log.
     #[must_use]
@@ -60,57 +64,29 @@ impl RecordingOpsLog {
     }
 
     /// Drop all recorded counters, gauges, and events.
-    ///
-    /// # Panics
-    ///
-    /// Panics if an internal lock is poisoned.
     pub fn clear(&self) {
-        let mut g = self.inner.lock().expect("recording ops log lock");
+        let mut g = lock_inner(&self.inner);
         g.counters.clear();
         g.gauges.clear();
         g.events.clear();
     }
 
     /// Snapshot of recorded counters.
-    ///
-    /// # Panics
-    ///
-    /// Panics if an internal lock is poisoned.
     #[must_use]
     pub fn counters(&self) -> Vec<RecordedCounter> {
-        self.inner
-            .lock()
-            .expect("recording ops log lock")
-            .counters
-            .clone()
+        lock_inner(&self.inner).counters.clone()
     }
 
     /// Snapshot of recorded gauges.
-    ///
-    /// # Panics
-    ///
-    /// Panics if an internal lock is poisoned.
     #[must_use]
     pub fn gauges(&self) -> Vec<RecordedGauge> {
-        self.inner
-            .lock()
-            .expect("recording ops log lock")
-            .gauges
-            .clone()
+        lock_inner(&self.inner).gauges.clone()
     }
 
     /// Snapshot of recorded events.
-    ///
-    /// # Panics
-    ///
-    /// Panics if an internal lock is poisoned.
     #[must_use]
     pub fn events(&self) -> Vec<RecordedEvent> {
-        self.inner
-            .lock()
-            .expect("recording ops log lock")
-            .events
-            .clone()
+        lock_inner(&self.inner).events.clone()
     }
 
     /// Counters whose name matches and labels contain `label_subset`.
@@ -150,15 +126,11 @@ impl OpsLog for RecordingOpsLog {
             .iter()
             .map(|(k, v)| (k.to_string(), v.to_string()))
             .collect();
-        self.inner
-            .lock()
-            .expect("recording ops log lock")
-            .counters
-            .push(RecordedCounter {
-                name: name.to_string(),
-                labels,
-                value,
-            });
+        lock_inner(&self.inner).counters.push(RecordedCounter {
+            name: name.to_string(),
+            labels,
+            value,
+        });
     }
 
     fn record_gauge(&self, name: &str, labels: &[(&str, &str)], value: f64) {
@@ -166,26 +138,18 @@ impl OpsLog for RecordingOpsLog {
             .iter()
             .map(|(k, v)| (k.to_string(), v.to_string()))
             .collect();
-        self.inner
-            .lock()
-            .expect("recording ops log lock")
-            .gauges
-            .push(RecordedGauge {
-                name: name.to_string(),
-                labels,
-                value,
-            });
+        lock_inner(&self.inner).gauges.push(RecordedGauge {
+            name: name.to_string(),
+            labels,
+            value,
+        });
     }
 
     fn log_event(&self, name: &str, payload: &Value) {
-        self.inner
-            .lock()
-            .expect("recording ops log lock")
-            .events
-            .push(RecordedEvent {
-                name: name.to_string(),
-                payload: payload.clone(),
-            });
+        lock_inner(&self.inner).events.push(RecordedEvent {
+            name: name.to_string(),
+            payload: payload.clone(),
+        });
     }
 }
 

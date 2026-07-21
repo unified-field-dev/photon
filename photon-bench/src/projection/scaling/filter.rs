@@ -73,10 +73,7 @@ pub fn extract_meta(path: &Path, v: &Value) -> ReportMeta {
 }
 
 pub fn is_primary_row(path: &Path, v: &Value) -> bool {
-    let fname = path
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("");
+    let fname = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
     let publishers_ok = fname.contains(PRIMARY_ROW_FILENAME_MARKER)
         || v.pointer("/dimensions/publishers")
             .and_then(Value::as_u64)

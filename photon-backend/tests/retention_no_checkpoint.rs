@@ -1,5 +1,7 @@
 //! Integration test: retention sweep is a no-op when no checkpoint exists.
 
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use std::sync::Arc;
 
 use photon_backend::{
@@ -13,9 +15,9 @@ async fn sweep_without_checkpoint_does_not_truncate() {
     std::env::set_var("PHOTON_RETENTION_SWEEP_MS", "0");
     std::env::set_var("PHOTON_TRANSPORT_RETAIN_SEQ", "5");
 
-    let port: Arc<dyn StoragePort> = Arc::new(InProcStoragePort::new(
-        TransportCrypto::from_bytes(*b"photon-dev-transport-key-32bytes"),
-    ));
+    let port: Arc<dyn StoragePort> = Arc::new(InProcStoragePort::new(TransportCrypto::from_bytes(
+        *b"photon-dev-transport-key-32bytes",
+    )));
 
     for i in 0..20 {
         port.append(

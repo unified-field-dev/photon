@@ -14,10 +14,10 @@ use sqlx::Row;
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
+use photon_backend::models::Event;
 use photon_backend::{
     topic_filter_matches, PhotonError, Result, StorageCapabilities, StoragePort, TransportCrypto,
 };
-use photon_backend::models::Event;
 
 use crate::config::sqlite_path_from_env;
 
@@ -29,8 +29,8 @@ fn checkpoint_key(sub: &str, topic: &str, topic_key: Option<&str>) -> String {
     format!("{sub}:{}:{}", topic, topic_key.unwrap_or("__null__"))
 }
 
-fn map_sqlx(err: &sqlx::Error) -> PhotonError {
-    PhotonError::PersistenceError(err.to_string())
+fn map_sqlx(err: sqlx::Error) -> PhotonError {
+    PhotonError::persistence("sqlite", err)
 }
 
 /// Embedded `SQLite` storage for the `sqlite` adapter tier.
@@ -90,7 +90,7 @@ impl SqliteStoragePort {
             .max_connections(5)
             .connect_with(options)
             .await
-            .map_err(|e| map_sqlx(&e))?;
+            .map_err(map_sqlx)?;
         Self::with_pool(pool).await
     }
 
@@ -129,7 +129,7 @@ impl SqliteStoragePort {
         )
         .execute(pool)
         .await
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
 
         sqlx::query(
             "CREATE INDEX IF NOT EXISTS idx_events_topic_seq
@@ -137,7 +137,7 @@ impl SqliteStoragePort {
         )
         .execute(pool)
         .await
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
 
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS checkpoints (
@@ -147,7 +147,7 @@ impl SqliteStoragePort {
         )
         .execute(pool)
         .await
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
 
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS seq_counters (
@@ -157,7 +157,7 @@ impl SqliteStoragePort {
         )
         .execute(pool)
         .await
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
 
         Ok(())
     }
@@ -172,7 +172,7 @@ impl SqliteStoragePort {
         .bind(&pk)
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
         Ok(row.get::<i64, _>(0))
     }
 
@@ -206,7 +206,7 @@ impl SqliteStoragePort {
             .fetch_all(pool)
             .await
         }
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
 
         rows.iter().map(row_to_event).collect()
     }
@@ -219,7 +219,7 @@ impl SqliteStoragePort {
         .bind(event_id)
         .fetch_optional(&self.pool)
         .await
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
         row.as_ref().map(row_to_event).transpose()
     }
 }
@@ -227,7 +227,7 @@ impl SqliteStoragePort {
 fn row_to_event(row: &sqlx::sqlite::SqliteRow) -> Result<Event> {
     let created_raw: String = row.get("created_at");
     let created_at = chrono::DateTime::parse_from_rfc3339(&created_raw)
-        .map_err(|e| PhotonError::PersistenceError(e.to_string()))?
+        .map_err(|e| PhotonError::persistence("sqlite decode", e))?
         .with_timezone(&Utc);
     let actor_json: String = row.get("actor_json");
     let payload_json: String = row.get("payload_json");
@@ -281,10 +281,9 @@ impl StoragePort for SqliteStoragePort {
         .bind(event.created_at.to_rfc3339())
         .execute(&self.pool)
         .await
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
 
-        self.events
-            .insert(event.event_id.clone(), event.clone());
+        self.events.insert(event.event_id.clone(), event.clone());
         let _ = self.tx.send(event.clone());
         Ok(event)
     }
@@ -385,7 +384,7 @@ impl StoragePort for SqliteStoragePort {
             .bind(&key)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| map_sqlx(&e))?;
+            .map_err(map_sqlx)?;
         Ok(row.map(|r| r.get::<i64, _>(0)))
     }
 
@@ -405,7 +404,7 @@ impl StoragePort for SqliteStoragePort {
         .bind(last_seq)
         .execute(&self.pool)
         .await
-        .map_err(|e| map_sqlx(&e))?;
+        .map_err(map_sqlx)?;
         Ok(())
     }
 

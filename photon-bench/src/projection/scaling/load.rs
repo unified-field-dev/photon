@@ -5,9 +5,7 @@ use std::path::Path;
 
 use anyhow::{bail, Result};
 
-use super::filter::{
-    extract_meta, is_primary_row, parse_point, should_include, ScalingFilter,
-};
+use super::filter::{extract_meta, is_primary_row, parse_point, should_include, ScalingFilter};
 use super::fit::{assemble_curve, build_points};
 use super::ScalingCurve;
 
@@ -52,8 +50,7 @@ pub fn load_scaling_curve(
                 nats_bench_peak_n1 = Some(nats_bench_peak_n1.map_or(bp, |prev| prev.max(bp)));
             }
         }
-        best
-            .entry(point.point_key)
+        best.entry(point.point_key)
             .and_modify(|(best_rate, best_config, best_file, best_bench, _)| {
                 if point.rate > *best_rate {
                     *best_rate = point.rate;

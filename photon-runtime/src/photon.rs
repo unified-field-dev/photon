@@ -8,7 +8,10 @@ use std::sync::Arc;
 use futures::stream::Stream;
 use photon_core::IdentityFactory;
 
-use photon_backend::{Event, PhotonBackend, ReclaimReport, Result, StoragePort, TopicRegistry, ExecutorServices, BackendCapabilities};
+use photon_backend::{
+    BackendCapabilities, Event, ExecutorServices, PhotonBackend, ReclaimReport, Result,
+    StoragePort, TopicRegistry,
+};
 
 use crate::admin::collect_admin_snapshot;
 use crate::admin::AdminSnapshot;
@@ -86,11 +89,11 @@ static DEFAULT_PHOTON: std::sync::RwLock<Option<Photon>> = std::sync::RwLock::ne
 /// # }
 /// ```
 ///
-/// # Panics
-///
-/// Panics if an internal lock is poisoned.
+/// Recovers from a poisoned lock so a prior panicking holder cannot brick configure.
 pub fn configure(photon: Photon) {
-    let mut guard = DEFAULT_PHOTON.write().unwrap();
+    let mut guard = DEFAULT_PHOTON
+        .write()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     *guard = Some(photon);
 }
 
@@ -98,11 +101,11 @@ pub fn configure(photon: Photon) {
 ///
 /// Prefer an explicit [`Photon`] handle. This exists for macro convenience helpers.
 ///
-/// # Panics
-///
-/// Panics if an internal lock is poisoned.
+/// Recovers from a poisoned lock so a prior panicking holder cannot brick lookup.
 pub fn default() -> Option<Photon> {
-    let guard = DEFAULT_PHOTON.read().unwrap();
+    let guard = DEFAULT_PHOTON
+        .read()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     guard.clone()
 }
 

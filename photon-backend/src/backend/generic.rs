@@ -89,12 +89,7 @@ impl PhotonBackend for GenericPhotonBackend {
         actor_json: Value,
         payload_json: Value,
     ) -> Result<String> {
-        let target = resolve_publish_target(
-            &self.registry,
-            topic_name,
-            topic_key,
-            &payload_json,
-        );
+        let target = resolve_publish_target(&self.registry, topic_name, topic_key, &payload_json);
         let event = self
             .port
             .append(
@@ -113,8 +108,7 @@ impl PhotonBackend for GenericPhotonBackend {
         topic_key_filter: Option<String>,
         after_seq: Option<i64>,
     ) -> Pin<Box<dyn Stream<Item = Result<Event>> + Send>> {
-        self.port
-            .subscribe(topic_name, topic_key_filter, after_seq)
+        self.port.subscribe(topic_name, topic_key_filter, after_seq)
     }
 
     async fn get_event(&self, event_id: &str) -> Result<Option<Event>> {

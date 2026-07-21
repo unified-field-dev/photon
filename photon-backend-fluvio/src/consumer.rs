@@ -17,9 +17,7 @@ use crate::checkpoint::CheckpointStore;
 use crate::config::{FluvioConfig, ReplayCursor};
 use crate::connect::SharedClient;
 use crate::message::{decode_record, record_sequence};
-use crate::stream_shard::{
-    composite_seq, fluvio_topic_for, local_after_seq_for_shard, pick_shard,
-};
+use crate::stream_shard::{composite_seq, fluvio_topic_for, local_after_seq_for_shard, pick_shard};
 
 /// Build a Fluvio-safe durable consumer id for a keyed subscription.
 #[must_use]
@@ -48,29 +46,20 @@ fn sanitize_name_part(value: &str) -> String {
         .collect()
 }
 
-fn offset_start(
-    replay_cursor: ReplayCursor,
-    after_seq: Option<i64>,
-) -> Result<Offset> {
+fn offset_start(replay_cursor: ReplayCursor, after_seq: Option<i64>) -> Result<Offset> {
     match replay_cursor {
         ReplayCursor::TailOnly => Ok(Offset::end()),
         ReplayCursor::StreamSeq => after_seq.filter(|&s| s >= 0).map_or_else(
             || Ok(Offset::end()),
             |seq| {
-                Offset::absolute(seq).map_err(|e| {
-                    PhotonError::Internal(format!("fluvio subscribe offset {seq}: {e}"))
-                })
+                Offset::absolute(seq)
+                    .map_err(|e| PhotonError::caused(format!("fluvio subscribe offset {seq}"), e))
             },
         ),
     }
 }
 
-fn normalize_event_seq(
-    event: &mut Event,
-    offset: i64,
-    config: &FluvioConfig,
-    topic_shard: u32,
-) {
+fn normalize_event_seq(event: &mut Event, offset: i64, config: &FluvioConfig, topic_shard: u32) {
     if config.replay_cursor != ReplayCursor::StreamSeq {
         return;
     }
@@ -145,13 +134,7 @@ pub fn subscribe_stream(
         );
     }
 
-    subscribe_merge_shards(
-        client,
-        config,
-        ensured_topics,
-        topic_name,
-        after_seq,
-    )
+    subscribe_merge_shards(client, config, ensured_topics, topic_name, after_seq)
 }
 
 fn subscribe_merge_shards(

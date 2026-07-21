@@ -42,24 +42,24 @@ impl PublishPipeline {
             .clone()
             .acquire_owned()
             .await
-            .map_err(|e| PhotonError::Internal(format!("nats publish pipeline: {e}")))?;
+            .map_err(|e| PhotonError::caused("nats publish pipeline:", e))?;
 
         let ack_future: PublishAckFuture = if let Some(headers) = headers {
             jetstream
                 .publish_with_headers(subject.clone(), headers, body)
                 .await
-                .map_err(|e| PhotonError::Internal(format!("nats publish {subject}: {e}")))?
+                .map_err(|e| PhotonError::caused(format!("nats publish {subject}"), e))?
         } else {
             jetstream
                 .publish(subject.clone(), body)
                 .await
-                .map_err(|e| PhotonError::Internal(format!("nats publish {subject}: {e}")))?
+                .map_err(|e| PhotonError::caused(format!("nats publish {subject}"), e))?
         };
 
         if self.sync_ack {
             let ack = ack_future
                 .await
-                .map_err(|e| PhotonError::Internal(format!("nats publish ack {subject}: {e}")))?;
+                .map_err(|e| PhotonError::caused(format!("nats publish ack {subject}"), e))?;
             drop(permit);
             Ok(Some(ack.sequence))
         } else {

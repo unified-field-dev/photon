@@ -14,9 +14,7 @@ use crate::config::FluvioConfig;
 use crate::connect::SharedClient;
 use crate::publish::PublishPipeline;
 use crate::stream_shard::{composite_seq, decompose_seq, pick_shard, publish_routing_key};
-use crate::subject::{
-    checkpoint_key, checkpoint_key_sharded, checkpoint_key_unkeyed_shards,
-};
+use crate::subject::{checkpoint_key, checkpoint_key_sharded, checkpoint_key_unkeyed_shards};
 
 /// In-memory cache backed by compact topic persistence.
 #[derive(Clone)]
@@ -66,9 +64,9 @@ impl CheckpointStore {
             let shard = pick_shard(key, self.config.topic_shards);
             let ck = checkpoint_key_sharded(subscription_name, topic_name, Some(key), shard);
             let local = load_i64(&self.cache, &ck)?;
-            return Ok(local.map(|seq| {
-                composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0))
-            }));
+            return Ok(
+                local.map(|seq| composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0)))
+            );
         }
 
         let map = self.load_unkeyed_shard_map(subscription_name, topic_name)?;
@@ -96,12 +94,12 @@ impl CheckpointStore {
         if topic_key.is_some() {
             let routing = publish_routing_key(topic_key, "");
             let expected = pick_shard(&routing, self.config.topic_shards);
-            let shard = if self.config.topic_shards > 1 && last_seq < crate::stream_shard::SEQ_STRIDE
-            {
-                expected
-            } else {
-                shard
-            };
+            let shard =
+                if self.config.topic_shards > 1 && last_seq < crate::stream_shard::SEQ_STRIDE {
+                    expected
+                } else {
+                    shard
+                };
             let key = checkpoint_key_sharded(subscription_name, topic_name, topic_key, shard);
             return put_i64(self, &key, local).await;
         }
@@ -151,12 +149,12 @@ async fn scan_checkpoint_topic(
         .offset_strategy(OffsetManagementStrategy::None)
         .disable_continuous(true)
         .build()
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint scanner config: {e}")))?;
+        .map_err(|e| PhotonError::caused("fluvio checkpoint scanner config:", e))?;
 
     let mut stream = client
         .consumer_with_config(consumer_config)
         .await
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint scanner: {e}")))?;
+        .map_err(|e| PhotonError::caused("fluvio checkpoint scanner:", e))?;
 
     let deadline = tokio::time::Instant::now() + std::time::Duration::from_secs(5);
     loop {
@@ -173,7 +171,9 @@ async fn scan_checkpoint_topic(
                 }
             }
             Ok(Some(Err(e))) => {
-                return Err(PhotonError::Internal(format!("fluvio checkpoint scan: {e:?}")));
+                return Err(PhotonError::Internal(format!(
+                    "fluvio checkpoint scan: {e:?}"
+                )));
             }
             Ok(None) | Err(_) => break,
         }
@@ -199,14 +199,9 @@ fn load_shard_map(cache: &DashMap<String, Bytes>, key: &str) -> Result<HashMap<u
         .map_or_else(|| Ok(HashMap::new()), |bytes| parse_shard_map_bytes(&bytes))
 }
 
-async fn put_json_map(
-    store: &CheckpointStore,
-    key: &str,
-    map: &HashMap<u32, i64>,
-) -> Result<()> {
-    let json = serde_json::to_string(map).map_err(|e| {
-        PhotonError::Internal(format!("fluvio checkpoint encode shard map: {e}"))
-    })?;
+async fn put_json_map(store: &CheckpointStore, key: &str, map: &HashMap<u32, i64>) -> Result<()> {
+    let json = serde_json::to_string(map)
+        .map_err(|e| PhotonError::caused("fluvio checkpoint encode shard map:", e))?;
     let payload = Bytes::from(json);
     store.cache.insert(key.to_string(), payload.clone());
     produce_checkpoint(store, key, payload).await
@@ -218,29 +213,29 @@ async fn produce_checkpoint(store: &CheckpointStore, key: &str, payload: Bytes) 
         .client
         .topic_producer(topic)
         .await
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint producer {key}: {e}")))?;
+        .map_err(|e| PhotonError::caused(format!("fluvio checkpoint producer {key}"), e))?;
     producer
         .send(key, payload.to_vec())
         .await
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint commit {key}: {e}")))?
+        .map_err(|e| PhotonError::caused(format!("fluvio checkpoint commit {key}"), e))?
         .wait()
         .await
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint ack {key}: {e}")))?;
+        .map_err(|e| PhotonError::caused(format!("fluvio checkpoint ack {key}"), e))?;
     Ok(())
 }
 
 fn parse_checkpoint_bytes(bytes: &Bytes) -> Result<i64> {
     let raw = std::str::from_utf8(bytes)
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint parse utf8: {e}")))?;
+        .map_err(|e| PhotonError::caused("fluvio checkpoint parse utf8:", e))?;
     raw.parse::<i64>()
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint parse i64 '{raw}': {e}")))
+        .map_err(|e| PhotonError::caused(format!("fluvio checkpoint parse i64 '{raw}'"), e))
 }
 
 fn parse_shard_map_bytes(bytes: &Bytes) -> Result<HashMap<u32, i64>> {
     let raw = std::str::from_utf8(bytes)
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint parse utf8: {e}")))?;
+        .map_err(|e| PhotonError::caused("fluvio checkpoint parse utf8:", e))?;
     let value: serde_json::Value = serde_json::from_str(raw)
-        .map_err(|e| PhotonError::Internal(format!("fluvio checkpoint parse json: {e}")))?;
+        .map_err(|e| PhotonError::caused("fluvio checkpoint parse json:", e))?;
     let Some(obj) = value.as_object() else {
         return Ok(HashMap::new());
     };
@@ -255,9 +250,7 @@ fn parse_shard_map_bytes(bytes: &Bytes) -> Result<HashMap<u32, i64>> {
 
 fn max_composite_from_map(map: &HashMap<u32, i64>) -> Option<i64> {
     map.iter()
-        .map(|(shard, local)| {
-            composite_seq(*shard, u64::try_from((*local).max(0)).unwrap_or(0))
-        })
+        .map(|(shard, local)| composite_seq(*shard, u64::try_from((*local).max(0)).unwrap_or(0)))
         .max()
 }
 

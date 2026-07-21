@@ -1,6 +1,24 @@
 //! Error types for Photon.
 
+use std::fmt;
+use std::sync::Arc;
+
 use thiserror::Error;
+
+/// Shared error source that keeps [`PhotonError`] [`Clone`].
+pub type SharedError = Arc<dyn std::error::Error + Send + Sync + 'static>;
+
+/// Opaque display-based error source for types that do not implement [`std::error::Error`].
+#[derive(Debug)]
+struct DisplayError(String);
+
+impl fmt::Display for DisplayError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl std::error::Error for DisplayError {}
 
 /// Result type alias for Photon operations.
 pub type Result<T> = std::result::Result<T, PhotonError>;
@@ -44,6 +62,16 @@ pub enum PhotonError {
     #[error("persistence error: {0}")]
     PersistenceError(String),
 
+    /// Persistence failure with preserved source chain.
+    #[error("persistence error: {context}")]
+    Persistence {
+        /// Human-readable context for the failure.
+        context: String,
+        /// Underlying store / I/O error.
+        #[source]
+        source: SharedError,
+    },
+
     /// Identity reconstruction failed at the handler boundary.
     ///
     /// Produced when [`photon_core::IdentityFactory::reconstruct`] rejects actor JSON
@@ -52,9 +80,57 @@ pub enum PhotonError {
     #[error("identity error: {0}")]
     Identity(String),
 
-    /// Internal error.
+    /// Internal error (opaque message, no source chain).
     #[error("internal error: {0}")]
     Internal(String),
+
+    /// Internal failure with preserved source chain.
+    #[error("internal error: {context}")]
+    Caused {
+        /// Human-readable context for the failure.
+        context: String,
+        /// Underlying error.
+        #[source]
+        source: SharedError,
+    },
+}
+
+impl PhotonError {
+    /// Internal error with a source chain (broker I/O, crypto, etc.).
+    ///
+    /// Accepts any [`Display`] value so callers can wrap SDK errors that do not
+    /// implement [`std::error::Error`] (e.g. some AEAD/crypto error types).
+    pub fn caused(
+        context: impl Into<String>,
+        err: impl fmt::Display + Send + Sync + 'static,
+    ) -> Self {
+        Self::Caused {
+            context: context.into(),
+            source: Arc::new(DisplayError(err.to_string())),
+        }
+    }
+
+    /// Internal error wrapping a real [`std::error::Error`] source chain.
+    pub fn caused_error(
+        context: impl Into<String>,
+        err: impl std::error::Error + Send + Sync + 'static,
+    ) -> Self {
+        Self::Caused {
+            context: context.into(),
+            source: Arc::new(err),
+        }
+    }
+
+    /// Persistence error with a source chain.
+    pub fn persistence(
+        context: impl Into<String>,
+        err: impl std::error::Error + Send + Sync + 'static,
+    ) -> Self {
+        Self::Persistence {
+            context: context.into(),
+            source: Arc::new(err),
+        }
+    }
 }
 
 impl From<serde_json::Error> for PhotonError {
@@ -65,6 +141,10 @@ impl From<serde_json::Error> for PhotonError {
 
 impl From<anyhow::Error> for PhotonError {
     fn from(err: anyhow::Error) -> Self {
-        Self::Internal(err.to_string())
+        // Prefer the full anyhow chain in the source message (`{#}`).
+        Self::Caused {
+            context: err.to_string(),
+            source: Arc::new(DisplayError(format!("{err:#}"))),
+        }
     }
 }

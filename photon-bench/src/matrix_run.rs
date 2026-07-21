@@ -28,11 +28,7 @@ pub async fn run_matrix(opts: MatrixRunOptions) -> Result<()> {
         experiments = experiments.split_off(idx);
     }
 
-    let base = matrix_from_cli(
-        &opts.storage,
-        &opts.telemetry,
-        opts.topology.as_deref(),
-    )?;
+    let base = matrix_from_cli(&opts.storage, &opts.telemetry, opts.topology.as_deref())?;
     let matrix_rows = slice_matrix_rows(&opts.slice, base);
 
     let reports_dir = PathBuf::from("photon-bench/reports");

@@ -3,9 +3,7 @@
 use std::io::Write;
 use std::sync::{Arc, Mutex};
 
-use photon_telemetry::{
-    install_ops_log, ConsoleOpsLog, NoOpsLog, OpsLog, RecordingOpsLog,
-};
+use photon_telemetry::{install_ops_log, ConsoleOpsLog, NoOpsLog, OpsLog, RecordingOpsLog};
 
 use crate::matrix::TelemetryAdapter;
 

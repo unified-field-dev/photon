@@ -24,6 +24,7 @@
 //! - **Checkpoints:** compact topic `photon-checkpoints` (same key layout as other broker adapters).
 //! - **Replay:** [`ReplayCursor::StreamSeq`] stores offset+1; [`ReplayCursor::TailOnly`] tails live only.
 
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 mod checkpoint;
 mod config;
 mod connect;
@@ -38,8 +39,8 @@ mod subject;
 mod topic;
 
 pub use config::{
-    KafkaConfig, KafkaStoragePortBuilder, ReplayCursor, BROKERS_ENV, MAX_INFLIGHT_ENV,
-    PREFIX_ENV, REPLAY_CURSOR_ENV, SYNC_ACK_ENV,
+    KafkaConfig, KafkaStoragePortBuilder, ReplayCursor, BROKERS_ENV, MAX_INFLIGHT_ENV, PREFIX_ENV,
+    REPLAY_CURSOR_ENV, SYNC_ACK_ENV,
 };
 pub use consumer::{consumer_group_for, durable_consumer_name};
 pub use port::{kafka_brokers_from_env, KafkaStoragePort};

@@ -275,14 +275,15 @@
 //!
 //! Full option reference: [`config`]. Macro expansion: repository `docs/macro-expansion.md`.
 
-/// Register a typed topic struct (`#[photon::topic]`).
-pub use photon_macros::topic;
-/// Register an async handler (`#[photon::subscribe]`).
-pub use photon_macros::subscribe;
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 /// Re-export identity port traits and JSON stubs from [`photon_core`].
 pub use photon_core::{
     actor_downcast_methods, Actor, IdentityError, IdentityFactory, JsonActor, JsonIdentityFactory,
 };
+/// Register an async handler (`#[photon::subscribe]`).
+pub use photon_macros::subscribe;
+/// Register a typed topic struct (`#[photon::topic]`).
+pub use photon_macros::topic;
 /// Quark inventory for compile-time topic/handler registration.
 pub use quark::inventory;
 

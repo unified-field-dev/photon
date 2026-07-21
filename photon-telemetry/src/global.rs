@@ -12,11 +12,11 @@ fn slot() -> &'static RwLock<Option<Arc<dyn OpsLog>>> {
 
 /// Install the process-wide ops log (typically at server boot before Photon runtime).
 ///
-/// # Panics
-///
-/// Panics if an internal lock is poisoned.
+/// Recovers from a poisoned lock so a prior panicking holder cannot brick install.
 pub fn install_ops_log(log: Arc<dyn OpsLog>) {
-    let mut guard = slot().write().expect("photon-telemetry ops log lock");
+    let mut guard = slot()
+        .write()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     *guard = Some(log);
 }
 
@@ -25,8 +25,8 @@ pub fn install_ops_log(log: Arc<dyn OpsLog>) {
 pub fn ops_log() -> Arc<dyn OpsLog> {
     slot()
         .read()
-        .ok()
-        .and_then(|g| g.clone())
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .clone()
         .unwrap_or_else(|| Arc::new(NoOpsLog))
 }
 

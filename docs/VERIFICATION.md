@@ -1,15 +1,16 @@
-# Documentation verification baseline
+# Documentation verification
 
 Re-run after doc changes. See [CONTRIBUTING.md](CONTRIBUTING.md#documentation).
 
-**Local laptop `cargo` is not the verification path** when the toolchain is broken or incomplete. Prefer the AWS SQLite smoke host:
+**Local laptop `cargo` is not the verification path** when the toolchain is broken or incomplete. Prefer the AWS SQLite smoke host (see [`infra/aws/sqlite-smoke/README.md`](../infra/aws/sqlite-smoke/README.md)):
 
 ```bash
-# From a machine with AWS access + instances.env provisioned:
-./infra/aws/sqlite-smok~/aws/photon-upstream/sqlite-smoke/run-remote-check.sh
+# After provision.sh + bootstrap.sh (scripts live under ~/aws/photon-upstream/):
+export INSTANCES_ENV=~/aws/photon-upstream/sqlite-smoke/instances.env
+~/aws/photon-upstream/sqlite-smoke/run-remote-check.sh
 ```
 
-That rsyncs the repo to EC2 and runs `cargo check`, full-workspace Clippy (`--all-targets --all-features -- -D warnings`), rustdoc (`RUSTDOCFLAGS=-D warnings`), and `photon-backend` tests. Broader CI subset (deny, e2e mem/sqlite, bench, examples, doctests): `./~/aws/photon-upstream/sqlite-smoke/run-remote-ci.sh`. Full E2E smoke: `./infra/aws/sqlite-smok~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh`.
+That rsyncs the repo to EC2 and runs `cargo check`, full-workspace Clippy (`--all-targets --all-features -- -D warnings`), rustdoc (`RUSTDOCFLAGS=-D warnings`), and `photon-backend` tests. Broader CI subset (deny, e2e mem/sqlite, bench, examples, doctests): `~/aws/photon-upstream/sqlite-smoke/run-remote-ci.sh`. Full E2E smoke: `~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh`.
 
 ## Commands
 
@@ -43,22 +44,9 @@ cargo test -p photon-e2e
 cargo test -p photon-backend --features runtime --tests
 ```
 
-## Baseline results (2026-07-08 documentation pass)
-
-| Check | Result |
-|-------|--------|
-| `cargo check --workspace --features runtime,mem` | Run after changes (AWS / CI) |
-| `RUSTDOCFLAGS=-D warnings cargo doc --workspace --all-features` | Run after changes (AWS / CI) |
-| `photon --doc` | 1+ passed (`no_run` first-boot example) |
-| `photon-runtime --doc` | 1 passed (`PhotonBuilder` example) |
-| `photon-macros --doc` | 2 passed (`no_run` topic + subscribe) |
-| `photon-backend --doc` | 1+ passed (`RetentionPolicy` example) |
-| All five facade examples | Run after changes (AWS / CI) |
-| `photon-e2e` | 18 passed (13 mem + 5 topology/telemetry); sqlite + brokers via `--features` on AWS/CI |
-
 ## Line coverage (CI artifact)
 
-PR CI runs a non-blocking [`coverage`](../.github/workflows/ci.yml) job with `cargo-llvm-cov`:
+PR CI runs a non-blocking [`coverage`](../.github/workflows/ci.yml) job with `cargo-llvm-cov`. The job also checks a soft floor (`COVERAGE_FLOOR_PCT` in the workflow); it stays `continue-on-error` until that floor is raised deliberately.
 
 ```bash
 # Install once
@@ -71,13 +59,12 @@ cargo llvm-cov --workspace --exclude photon-e2e --exclude photon-bench --feature
 cargo llvm-cov --workspace --exclude photon-e2e --exclude photon-bench --features runtime,mem --lcov --output-path lcov.info
 ```
 
-**Baseline (2026-07-08):** ~32% line coverage on the scoped workspace slice above.
-
 Download `coverage-lcov` from the GitHub Actions run artifacts for the CI report.
 
-## Coverage notes
+## Notes
 
-- Workspace `[workspace.lints.rust] missing_docs = "deny"`; every member has `[lints] workspace = true`
+- Workspace `[workspace.lints.rust] missing_docs = "deny"`; library members use `[lints] workspace = true`. Test/bench crates (`photon-e2e`, `photon-testkit`, `photon-bench`) declare matching Clippy tables so they can allow `unwrap_used` / `expect_used`.
+- Restriction lints (`unwrap_used`, `expect_used`, `dbg_macro`, `print_*`, `todo`) are enforced at the workspace level — see [`CONTRIBUTING.md`](../CONTRIBUTING.md#rust-standards--lint-policy).
 - Lane map on facade: **Creating topics** / **Integrating the host** / **Developing the backend**
 - Config reference: `photon::config` includes `docs/configuration.md`
 - Macro expansion: `docs/macro-expansion.md`

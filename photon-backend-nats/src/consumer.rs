@@ -70,15 +70,10 @@ fn deliver_policy(replay_cursor: ReplayCursor, after_seq: Option<i64>) -> Delive
 
 fn policies_compatible(existing: DeliverPolicy, desired: DeliverPolicy) -> bool {
     match (&existing, &desired) {
-        (DeliverPolicy::New, DeliverPolicy::New)
-        | (DeliverPolicy::All, DeliverPolicy::All) => true,
+        (DeliverPolicy::New, DeliverPolicy::New) | (DeliverPolicy::All, DeliverPolicy::All) => true,
         (
-            DeliverPolicy::ByStartSequence {
-                start_sequence: a,
-            },
-            DeliverPolicy::ByStartSequence {
-                start_sequence: b,
-            },
+            DeliverPolicy::ByStartSequence { start_sequence: a },
+            DeliverPolicy::ByStartSequence { start_sequence: b },
         ) => a == b,
         _ => false,
     }
@@ -107,14 +102,19 @@ fn shard_from_subject(subject: &str, shard_count: u32) -> u32 {
     shard_str.parse().unwrap_or(0)
 }
 
-fn normalize_event_seq(event: &mut Event, message: &async_nats::jetstream::Message, config: &NatsConfig) {
+fn normalize_event_seq(
+    event: &mut Event,
+    message: &async_nats::jetstream::Message,
+    config: &NatsConfig,
+) {
     if config.replay_cursor != ReplayCursor::StreamSeq {
         return;
     }
     let shard = if config.is_sharded() {
-        event
-            .topic_key
-            .as_deref().map_or_else(|| shard_from_subject(message.subject.as_str(), config.stream_shards), |key| pick_shard(key, config.stream_shards))
+        event.topic_key.as_deref().map_or_else(
+            || shard_from_subject(message.subject.as_str(), config.stream_shards),
+            |key| pick_shard(key, config.stream_shards),
+        )
     } else {
         0
     };
@@ -165,13 +165,7 @@ pub fn subscribe_push(
         );
     }
 
-    subscribe_merge_shards(
-        jetstream,
-        config,
-        checkpoint_store,
-        topic_name,
-        after_seq,
-    )
+    subscribe_merge_shards(jetstream, config, checkpoint_store, topic_name, after_seq)
 }
 
 fn subscribe_merge_shards(
@@ -280,11 +274,11 @@ fn subscribe_single(
                         Err(e) => yield Err(e),
                     }
                     if let Err(e) = ack_result {
-                        yield Err(PhotonError::Internal(format!("nats message ack: {e}")));
+                        yield Err(PhotonError::caused("nats message ack:", e));
                     }
                 }
                 Err(e) => {
-                    yield Err(PhotonError::Internal(format!("nats subscribe recv: {e}")));
+                    yield Err(PhotonError::caused("nats subscribe recv:", e));
                 }
             }
         }
@@ -336,9 +330,10 @@ async fn open_ephemeral_push_consumer(
         ..Default::default()
     };
 
-    stream.create_consumer(config).await.map_err(|e| {
-        PhotonError::Internal(format!("nats create consumer {filter_subject}: {e}"))
-    })
+    stream
+        .create_consumer(config)
+        .await
+        .map_err(|e| PhotonError::caused(format!("nats create consumer {filter_subject}"), e))
 }
 
 async fn ensure_keyed_durable_consumer(
@@ -352,7 +347,7 @@ async fn ensure_keyed_durable_consumer(
         Ok(info) if consumer_config_matches(&info, deliver_subject, deliver_policy) => true,
         Ok(_) => {
             stream.delete_consumer(durable_name).await.map_err(|e| {
-                PhotonError::Internal(format!("nats delete consumer {durable_name}: {e}"))
+                PhotonError::caused(format!("nats delete consumer {durable_name}"), e)
             })?;
             false
         }
@@ -360,9 +355,10 @@ async fn ensure_keyed_durable_consumer(
     };
 
     if reuse {
-        return stream.get_consumer(durable_name).await.map_err(|e| {
-            PhotonError::Internal(format!("nats get consumer {durable_name}: {e}"))
-        });
+        return stream
+            .get_consumer(durable_name)
+            .await
+            .map_err(|e| PhotonError::caused(format!("nats get consumer {durable_name}"), e));
     }
 
     let durable = durable_name.to_string();
@@ -376,9 +372,10 @@ async fn ensure_keyed_durable_consumer(
         ..Default::default()
     };
 
-    stream.create_consumer(config).await.map_err(|e| {
-        PhotonError::Internal(format!("nats create durable consumer {durable_name}: {e}"))
-    })
+    stream
+        .create_consumer(config)
+        .await
+        .map_err(|e| PhotonError::caused(format!("nats create durable consumer {durable_name}"), e))
 }
 
 /// Build per-shard replay cursors for unkeyed sharded subscriptions.

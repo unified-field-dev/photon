@@ -378,12 +378,27 @@ Local CPU-path microbenches under `photon-backend/benches/`. Not fleet ingress; 
 # On AWS smoke host (preferred for check-in):
 # infra/aws/sqlite-smoke/scripts/run-remote-criterion.sh
 
+export CARGO_BUILD_JOBS=1
+
 cargo bench -p photon-backend --bench envelope_crypto --features runtime
 cargo bench -p photon-backend --bench shard_routing --features runtime
 cargo bench -p photon-backend --bench dispatch_stub --features runtime
+
+# Optional local Criterion compare (baselines live under target/; do not commit them):
+cargo bench -p photon-backend --features runtime -- --save-baseline local
+cargo bench -p photon-backend --features runtime -- --baseline local
 ```
 
-Baselines (2026-07-12, `aws-t3-medium`): [`PERFORMANCE_STUDY.md` §10](PERFORMANCE_STUDY.md#10-microbenchmarks--hot-path-baselines-2026-07-12).
+Methodology and recorded study numbers: [`PERFORMANCE_STUDY.md` §10](PERFORMANCE_STUDY.md#10-microbenchmarks--hot-path-baselines-2026-07-12).
+
+### Mem-tier performance gates (CI / lab)
+
+| Gate | Experiment | How |
+|------|------------|-----|
+| Smoke pass | `bm-p0` (CI `bench-smoke`) | JSON `"pass": true` |
+| Latency / sustained publish | `bm-p0`, `bm-pl2` | Targets and methodology in [`PERFORMANCE_STUDY.md`](PERFORMANCE_STUDY.md); do not duplicate snapshot numbers here |
+
+See [`CONTRIBUTING.md`](../CONTRIBUTING.md#performance-targets-mem-tier).
 
 ---
 

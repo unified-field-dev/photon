@@ -5,13 +5,11 @@
 //! Requires `PHOTON_TRANSPORT_KEY` (see `docs/configuration.md`).
 #![allow(missing_docs)]
 #![allow(clippy::unused_async, clippy::used_underscore_binding)]
-
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
 
-use photon::{
-    subscribe, topic, JsonIdentityFactory, Photon, Actor,
-};
+use photon::{subscribe, topic, Actor, JsonIdentityFactory, Photon};
 
 const SHARD_COUNT: u32 = 4;
 const PUBLISH_COUNT: u32 = 40;
@@ -39,9 +37,7 @@ async fn on_work(_actor: Box<dyn Actor>, event: WorkItem) -> photon::Result<()> 
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     // Assign all virtual shards to this single process (multi-node would split 0-3).
     std::env::set_var("PHOTON_GROUP_SHARD_COUNT", SHARD_COUNT.to_string());

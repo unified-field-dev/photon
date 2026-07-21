@@ -67,9 +67,7 @@ pub fn group_publish_storage_key(
     payload: &Value,
     event_id: &str,
 ) -> String {
-    let cfg = desc
-        .shard_config
-        .unwrap_or_else(ShardConfig::default_count);
+    let cfg = desc.shard_config.unwrap_or_else(ShardConfig::default_count);
     let rk = routing_key(publish_key, payload, cfg.shard_by, event_id);
     let id = shard_id(&rk, cfg.shard_count);
     shard_storage_key(id)

@@ -4,7 +4,9 @@ use std::sync::Arc;
 
 use crate::checkpoint::CheckpointCoalescer;
 use crate::delivery::{DlqSink, WorkerPool};
-use crate::retention::{PartitionReclaim, RetentionDeps, RetentionHook, RetentionPolicy, RetentionReclaimer};
+use crate::retention::{
+    PartitionReclaim, RetentionDeps, RetentionHook, RetentionPolicy, RetentionReclaimer,
+};
 use crate::storage::StoragePort;
 
 /// Shared runtime services for handler delivery.

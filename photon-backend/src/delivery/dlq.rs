@@ -2,7 +2,7 @@
 
 use chrono::Utc;
 
-use crate::error::{PhotonError, Result};
+use crate::error::Result;
 use crate::instrumentation::{dlq_fields, record_handler_failure, FailureReason};
 use photon_telemetry::ops_log;
 
@@ -65,11 +65,21 @@ impl DlqSink {
     /// Returns an error if the operation fails.
     pub fn record(&self, params: &DlqRecordParams<'_>) -> Result<()> {
         record_handler_failure(params.topic_name, params.reason);
+        tracing::warn!(
+            event_id = params.event_id,
+            topic = params.topic_name,
+            topic_key = ?params.topic_key,
+            seq = params.seq,
+            subscription = ?params.subscription_name,
+            reason = ?params.reason,
+            error = %params.error,
+            "handler delivery failed; recorded to DLQ"
+        );
         {
             let mut guard = self
                 .records
                 .lock()
-                .map_err(|_| PhotonError::Internal("dlq lock poisoned".into()))?;
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
             guard.push(DlqRecord {
                 event_id: params.event_id.to_string(),
                 topic_name: params.topic_name.to_string(),
@@ -108,15 +118,12 @@ impl DlqSink {
 
     /// Minimum seq among DLQ records for a transport partition (retention pin).
     pub fn min_seq_for(&self, topic: &str, topic_key: Option<&str>) -> Option<i64> {
-        self.records
-            .lock()
-            .ok()
-            .and_then(|guard| {
-                guard
-                    .iter()
-                    .filter(|r| r.topic_name == topic && r.topic_key.as_deref() == topic_key)
-                    .map(|r| r.seq)
-                    .min()
-            })
+        self.records.lock().ok().and_then(|guard| {
+            guard
+                .iter()
+                .filter(|r| r.topic_name == topic && r.topic_key.as_deref() == topic_key)
+                .map(|r| r.seq)
+                .min()
+        })
     }
 }

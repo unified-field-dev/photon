@@ -5,10 +5,7 @@ use crate::matrix::{MatrixSpec, StorageAdapter, Topology};
 /// Whether the matrix row can run without external infrastructure.
 #[must_use]
 pub const fn lab_store_available(matrix: &MatrixSpec) -> bool {
-    matches!(
-        matrix.storage,
-        StorageAdapter::Mem | StorageAdapter::Sqlite
-    )
+    matches!(matrix.storage, StorageAdapter::Mem | StorageAdapter::Sqlite)
 }
 
 /// Skip reason when lab store is unavailable.
