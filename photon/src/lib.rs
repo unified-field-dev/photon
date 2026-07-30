@@ -275,8 +275,8 @@
 //!   no in-core topic ACL, production identity factory, broker TLS via `BrokerTransportSecurity` /
 //!   `PHOTON_ALLOW_INSECURE_BROKER`, never `PHOTON_ALLOW_DEV_TRANSPORT_KEY` in production).
 //! - **Durable multi-process:** use a broker adapter; `mem` does not cross process boundaries.
-//! - **Lab topologies:** testkit / bench `PHOTON_TOPOLOGY` values are harness labels — not the
-//!   Embedded / Brokered product choices above.
+//! - **Lab topologies:** testkit / bench `PHOTON_TOPOLOGY` values are harness labels for
+//!   lab matrices. Product choices remain Embedded / Brokered above.
 //! - **Custom adapters:** implement [`StoragePort`] and pass it to
 //!   [`PhotonBuilder::storage_port`]. Advanced delivery traits live behind that port.
 //!

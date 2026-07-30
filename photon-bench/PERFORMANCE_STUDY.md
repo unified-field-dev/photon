@@ -471,7 +471,7 @@ Factors that can inflate, deflate, or mis-rank numbers if ignored when interpret
 | **Telemetry on** | Console ops log adds publish path cost | Authoritative ingress uses `--telemetry off` |
 | **Cold vs warm process** | First-run JIT / page cache / broker connect | Warmup ops and steady-state windows per experiment specs |
 | **Criterion microbenches vs fleet** | Microbenches isolate CPU paths (encrypt, shard hash); not broker ingress | Register as BM-CRIT-*; do not substitute for BM-PFH |
-| **Adapter leaderboard fallacy** | Table of ops/s looks like a fair rank | Numbers are representative fleet snapshots for Photon’s path on each adapter — not a vendor bake-off under identical client libraries |
+| **Adapter leaderboard fallacy** | Table of ops/s looks like a fair rank | Numbers are representative fleet snapshots for Photon’s path on each adapter under that campaign’s client and topology |
 
 ---
 

@@ -40,7 +40,7 @@ fn seen_seqs() -> &'static Mutex<HashSet<u32>> {
 
 // `durable = "recovery-worker"` is the checkpoint owner name: the executor loads its last
 // committed seq at startup (`ReplayCursor::StreamSeq`-equivalent semantics) and only delivers
-// events after it — this is what makes phase 2 below a true resume, not a replay-from-scratch.
+// events after it — so phase 2 below resumes from that checkpoint.
 #[subscribe(topic = "examples.durable.ticks", durable = "recovery-worker")]
 async fn on_tick(_actor: Box<dyn Actor>, event: Tick) -> photon::Result<()> {
     let first_delivery = seen_seqs().lock().unwrap().insert(event.n);
