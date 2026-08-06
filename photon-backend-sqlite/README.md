@@ -21,8 +21,8 @@ Photon::builder().storage_port(Arc::new(port)).auto_registry().build()?;
 
 ## Validation
 
-Run on AWS only (see [`infra/aws/sqlite-smoke/README.md`](../infra/aws/sqlite-smoke/README.md)):
+Run on AWS only (see `$UF_LAB_ROOT/photon/infra/aws/sqlite-smoke/README.md`):
 
 ```bash
-~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh
+$UF_LAB_ROOT/photon/infra/aws/sqlite-smoke/
 ```

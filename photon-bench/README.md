@@ -4,8 +4,8 @@ Synthetic benchmarks and pre-registered experiment matrix for Photon pub/sub acr
 
 | Document | Role |
 |----------|------|
-| [`PERFORMANCE_STUDY.md`](PERFORMANCE_STUDY.md) | Methodology, research questions, threats to validity |
-| [`EXPERIMENTS.md`](EXPERIMENTS.md) | Registry — dimensions, IDs (including BM-CRIT-*), status, pass criteria, runner commands |
+| [`PERFORMANCE.md`](PERFORMANCE.md) | Methodology, research questions, threats to validity |
+| [`PERFORMANCE.md`](PERFORMANCE.md) | Registry — dimensions, IDs (including BM-CRIT-*), status, pass criteria, runner commands |
 
 ## Workspace cargo profiles
 

@@ -165,7 +165,7 @@ See [Getting started](https://docs.rs/uf-photon/latest/photon/#getting-started) 
 CI runs on every push and PR ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). When local `cargo` is unavailable, use AWS:
 
 ```bash
-~/aws/photon-upstream/sqlite-smoke/run-remote-check.sh
+$UF_LAB_ROOT/photon/scripts/run-remote-check.sh  # uf-live-cloud-lab
 ```
 
 Doc verification: [docs/VERIFICATION.md](docs/VERIFICATION.md).

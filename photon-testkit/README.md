@@ -65,7 +65,7 @@ Functions: `fleet_store_available`, `fleet_store_skip_reason`.
 
 PR CI runs the full matrix (`mem`, `sqlite`, `nats`, `kafka`, `fluvio`) — see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) `e2e` job.
 
-**Dev laptop constraint:** run builds/tests on AWS via [`~/aws/photon-upstream/scripts/run-all-e2e-aws.sh`](.~/aws/photon-upstream/scripts/run-all-e2e-aws.sh).
+**Dev laptop constraint:** run builds/tests on AWS via `$UF_LAB_ROOT/photon/scripts/run-all-e2e-aws.sh`.
 
 ## Build
 

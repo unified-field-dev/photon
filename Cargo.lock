@@ -2378,7 +2378,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -2405,7 +2405,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend-fluvio"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2423,7 +2423,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend-kafka"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2441,7 +2441,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend-nats"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-nats",
  "async-stream",
@@ -2459,7 +2459,7 @@ dependencies = [
 
 [[package]]
 name = "photon-backend-sqlite"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2476,7 +2476,7 @@ dependencies = [
 
 [[package]]
 name = "photon-bench"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -2489,7 +2489,7 @@ dependencies = [
 
 [[package]]
 name = "photon-e2e"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "futures",
  "photon-testkit",
@@ -2502,7 +2502,7 @@ dependencies = [
 
 [[package]]
 name = "photon-macros"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2511,7 +2511,7 @@ dependencies = [
 
 [[package]]
 name = "photon-runtime"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "futures",
  "photon-backend",
@@ -2526,14 +2526,14 @@ dependencies = [
 
 [[package]]
 name = "photon-telemetry"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
 ]
 
 [[package]]
 name = "photon-testkit"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "futures",
@@ -4017,7 +4017,7 @@ checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
 
 [[package]]
 name = "uf-photon"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4041,7 +4041,7 @@ dependencies = [
 
 [[package]]
 name = "uf-photon-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde",
  "serde_json",
