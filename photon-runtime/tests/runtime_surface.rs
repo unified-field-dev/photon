@@ -121,6 +121,7 @@ async fn admin_snapshot_reports_backend_topics_handlers_and_checkpoints() {
 
     assert_eq!(snapshot.backend.telemetry_label, "mem");
     assert!(snapshot.backend.supports_get_event);
+    assert!(snapshot.backend.supports_list_events);
 
     assert!(snapshot.topics.iter().any(|t| t.topic_name == TOPIC));
 

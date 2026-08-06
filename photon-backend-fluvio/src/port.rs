@@ -170,6 +170,20 @@ impl StoragePort for FluvioStoragePort {
         Ok(None)
     }
 
+    async fn list_by_topic(
+        &self,
+        _topic_name: &str,
+        _topic_key: Option<&str>,
+        _after_seq: Option<i64>,
+        _limit: usize,
+    ) -> Result<Vec<Event>> {
+        Ok(Vec::new())
+    }
+
+    async fn list_recent(&self, _limit: usize) -> Result<Vec<Event>> {
+        Ok(Vec::new())
+    }
+
     #[allow(clippy::unused_async)] // `StoragePort` async trait; load is an in-memory cache read
     async fn load_checkpoint(
         &self,

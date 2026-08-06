@@ -89,6 +89,7 @@ fn collect_backend(caps: BackendCapabilities) -> AdminBackendSummary {
     AdminBackendSummary {
         telemetry_label: caps.telemetry_label.to_string(),
         supports_get_event: caps.supports_get_event,
+        supports_list_events: caps.supports_list_events,
         max_replay_window_secs: caps.max_replay_window.map(|d| d.as_secs()),
     }
 }

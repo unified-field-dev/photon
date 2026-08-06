@@ -81,6 +81,26 @@ pub trait PhotonBackend: Send + Sync {
     /// - Returns `None` when unknown or truncated; see backend [`BackendCapabilities`].
     async fn get_event(&self, event_id: &str) -> Result<Option<Event>>;
 
+    /// Bounded page of events for one topic (ops browse).
+    ///
+    /// Default returns empty when the adapter does not support listing.
+    async fn list_by_topic(
+        &self,
+        _topic_name: &str,
+        _topic_key: Option<&str>,
+        _after_seq: Option<i64>,
+        _limit: usize,
+    ) -> Result<Vec<Event>> {
+        Ok(Vec::new())
+    }
+
+    /// Bounded cross-topic page of newest events (ops browse).
+    ///
+    /// Default returns empty when the adapter does not support listing.
+    async fn list_recent(&self, _limit: usize) -> Result<Vec<Event>> {
+        Ok(Vec::new())
+    }
+
     /// Inventory-discovered topic descriptors.
     fn registry(&self) -> &TopicRegistry;
 

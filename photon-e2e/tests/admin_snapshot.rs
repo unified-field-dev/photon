@@ -62,6 +62,7 @@ async fn admin_snapshot_reports_topics_handlers_and_checkpoint() {
     let snapshot = photon.admin_snapshot().await.expect("admin snapshot");
 
     assert!(snapshot.backend.supports_get_event);
+    assert!(snapshot.backend.supports_list_events);
     assert_eq!(snapshot.backend.telemetry_label, "mem");
 
     let topic = snapshot

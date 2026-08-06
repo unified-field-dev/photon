@@ -251,6 +251,42 @@ impl Photon {
         PhotonBackend::get_event(self.backend.as_ref(), event_id).await
     }
 
+    /// Bounded page of events for one topic (ops browse).
+    ///
+    /// Returns an empty vec when the storage adapter does not support listing
+    /// (`supports_list_events` is false).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the topic name is invalid or storage fails.
+    pub async fn list_events_by_topic(
+        &self,
+        topic_name: &str,
+        topic_key: Option<&str>,
+        after_seq: Option<i64>,
+        limit: usize,
+    ) -> Result<Vec<Event>> {
+        PhotonBackend::list_by_topic(
+            self.backend.as_ref(),
+            topic_name,
+            topic_key,
+            after_seq,
+            limit,
+        )
+        .await
+    }
+
+    /// Bounded cross-topic page of newest events (ops browse).
+    ///
+    /// Returns an empty vec when the storage adapter does not support listing.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if storage fails.
+    pub async fn list_recent_events(&self, limit: usize) -> Result<Vec<Event>> {
+        PhotonBackend::list_recent(self.backend.as_ref(), limit).await
+    }
+
     /// Return the registered topic catalog.
     #[must_use]
     pub fn registry(&self) -> &TopicRegistry {

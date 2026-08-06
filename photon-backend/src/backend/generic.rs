@@ -124,6 +124,29 @@ impl PhotonBackend for GenericPhotonBackend {
         self.port.get_event(event_id).await
     }
 
+    async fn list_by_topic(
+        &self,
+        topic_name: &str,
+        topic_key: Option<&str>,
+        after_seq: Option<i64>,
+        limit: usize,
+    ) -> Result<Vec<Event>> {
+        if !self.capabilities.supports_list_events {
+            return Ok(Vec::new());
+        }
+        validate_topic_name(topic_name)?;
+        self.port
+            .list_by_topic(topic_name, topic_key, after_seq, limit)
+            .await
+    }
+
+    async fn list_recent(&self, limit: usize) -> Result<Vec<Event>> {
+        if !self.capabilities.supports_list_events {
+            return Ok(Vec::new());
+        }
+        self.port.list_recent(limit).await
+    }
+
     fn registry(&self) -> &TopicRegistry {
         &self.registry
     }

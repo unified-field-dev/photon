@@ -232,6 +232,49 @@ impl StoragePort for InProcStoragePort {
             .transpose()
     }
 
+    async fn list_by_topic(
+        &self,
+        topic_name: &str,
+        topic_key: Option<&str>,
+        after_seq: Option<i64>,
+        limit: usize,
+    ) -> Result<Vec<Event>> {
+        if limit == 0 {
+            return Ok(Vec::new());
+        }
+        let after = after_seq.unwrap_or(0);
+        let mut matched: Vec<Event> = Vec::new();
+        for entry in self.events.iter() {
+            let sealed = entry.value();
+            if sealed.topic_name != topic_name {
+                continue;
+            }
+            if topic_key.is_some_and(|k| sealed.topic_key.as_deref() != Some(k)) {
+                continue;
+            }
+            if sealed.seq <= after {
+                continue;
+            }
+            matched.push(open_stored_event(&self.crypto, sealed.clone())?);
+        }
+        matched.sort_by_key(|e| e.seq);
+        matched.truncate(limit);
+        Ok(matched)
+    }
+
+    async fn list_recent(&self, limit: usize) -> Result<Vec<Event>> {
+        if limit == 0 {
+            return Ok(Vec::new());
+        }
+        let mut matched: Vec<Event> = Vec::with_capacity(self.events.len().min(limit * 2));
+        for entry in self.events.iter() {
+            matched.push(open_stored_event(&self.crypto, entry.value().clone())?);
+        }
+        matched.sort_by(|a, b| b.created_at.cmp(&a.created_at).then(b.seq.cmp(&a.seq)));
+        matched.truncate(limit);
+        Ok(matched)
+    }
+
     async fn load_checkpoint(
         &self,
         subscription_name: &str,
@@ -312,5 +355,61 @@ mod tests {
             .expect("get event")
             .expect("event");
         assert_eq!(fetched.payload_json, appended.payload_json);
+    }
+
+    #[tokio::test]
+    async fn list_by_topic_and_list_recent_honor_limit_and_order() {
+        let port = InProcStoragePort::new(TransportCrypto::from_bytes([9; 32]));
+        let topic = "test.list";
+        let mut ids = Vec::new();
+        for i in 0..5 {
+            let ev = port
+                .append(
+                    topic,
+                    None,
+                    serde_json::json!({}),
+                    serde_json::json!({"n": i}),
+                )
+                .await
+                .expect("append");
+            ids.push(ev.event_id);
+        }
+        let other = port
+            .append(
+                "test.other",
+                None,
+                serde_json::json!({}),
+                serde_json::json!({"n": 99}),
+            )
+            .await
+            .expect("append other");
+
+        let page = port
+            .list_by_topic(topic, None, None, 3)
+            .await
+            .expect("list_by_topic");
+        assert_eq!(page.len(), 3);
+        assert_eq!(page[0].event_id, ids[0]);
+        assert_eq!(page[1].event_id, ids[1]);
+        assert_eq!(page[2].event_id, ids[2]);
+        assert!(page.windows(2).all(|w| w[0].seq < w[1].seq));
+
+        let after = port
+            .list_by_topic(topic, None, Some(2), 10)
+            .await
+            .expect("after_seq");
+        assert!(after.iter().all(|e| e.seq > 2));
+        assert!(after.iter().all(|e| e.topic_name == topic));
+
+        let recent = port.list_recent(2).await.expect("list_recent");
+        assert_eq!(recent.len(), 2);
+        assert!(recent[0].created_at >= recent[1].created_at);
+        assert!(recent.iter().any(|e| e.event_id == other.event_id || e.topic_name == topic));
+
+        let empty = port
+            .list_by_topic(topic, None, None, 0)
+            .await
+            .expect("zero limit");
+        assert!(empty.is_empty());
     }
 }

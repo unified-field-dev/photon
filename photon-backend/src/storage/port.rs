@@ -28,6 +28,8 @@ use crate::models::Event;
 pub struct StorageCapabilities {
     /// Whether [`StoragePort::get_event`] is supported.
     pub supports_get_event: bool,
+    /// Whether [`StoragePort::list_by_topic`] / [`StoragePort::list_recent`] are supported.
+    pub supports_list_events: bool,
     /// Maximum replay window for bounded retention adapters.
     pub max_replay_window: Option<Duration>,
     /// Stable telemetry / bench label (`mem`, `nats`, …).
@@ -40,6 +42,7 @@ impl StorageCapabilities {
     pub const fn mem() -> Self {
         Self {
             supports_get_event: true,
+            supports_list_events: true,
             max_replay_window: None,
             telemetry_label: "mem",
         }
@@ -50,6 +53,7 @@ impl StorageCapabilities {
     pub const fn sqlite() -> Self {
         Self {
             supports_get_event: true,
+            supports_list_events: true,
             max_replay_window: None,
             telemetry_label: "sqlite",
         }
@@ -60,6 +64,7 @@ impl StorageCapabilities {
     pub const fn broker(label: &'static str) -> Self {
         Self {
             supports_get_event: false,
+            supports_list_events: false,
             max_replay_window: Some(Duration::from_mins(15)),
             telemetry_label: label,
         }
@@ -138,6 +143,32 @@ pub trait StoragePort: Send + Sync {
     ///
     /// - Returns `None` when the id is unknown or the event was truncated by retention.
     async fn get_event(&self, event_id: &str) -> Result<Option<Event>>;
+
+    /// Bounded page of events for one topic (ops browse).
+    ///
+    /// # Contract
+    ///
+    /// - When `supports_list_events` is false, returns an empty vec (brokers).
+    /// - When `after_seq` is set, only events with `seq > after_seq` are included.
+    /// - When `topic_key` is set, only that partition is included.
+    /// - Results are ordered by `seq` ascending and capped at `limit` (zero → empty).
+    /// - Returned events are decrypted like [`Self::get_event`].
+    async fn list_by_topic(
+        &self,
+        topic_name: &str,
+        topic_key: Option<&str>,
+        after_seq: Option<i64>,
+        limit: usize,
+    ) -> Result<Vec<Event>>;
+
+    /// Bounded cross-topic page of newest events (ops browse).
+    ///
+    /// # Contract
+    ///
+    /// - When `supports_list_events` is false, returns an empty vec (brokers).
+    /// - Ordered by `created_at` descending, capped at `limit` (zero → empty).
+    /// - Returned events are decrypted like [`Self::get_event`].
+    async fn list_recent(&self, limit: usize) -> Result<Vec<Event>>;
 
     /// Load durable subscription high-water seq.
     ///

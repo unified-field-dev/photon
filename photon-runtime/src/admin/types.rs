@@ -49,6 +49,8 @@ pub struct AdminBackendSummary {
     pub telemetry_label: String,
     /// Whether [`Photon::get_event`](crate::Photon::get_event) is supported.
     pub supports_get_event: bool,
+    /// Whether list/browse APIs (`list_events_by_topic` / `list_recent_events`) are supported.
+    pub supports_list_events: bool,
     /// Maximum replay window in seconds for bounded retention adapters.
     pub max_replay_window_secs: Option<u64>,
 }

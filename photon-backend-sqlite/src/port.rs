@@ -237,6 +237,76 @@ impl SqliteStoragePort {
             .map(|event| open_stored_event(&self.crypto, event))
             .transpose()
     }
+
+    async fn fetch_list_by_topic(
+        &self,
+        topic_name: &str,
+        topic_key: Option<&str>,
+        after_seq: Option<i64>,
+        limit: usize,
+    ) -> Result<Vec<Event>> {
+        if limit == 0 {
+            return Ok(Vec::new());
+        }
+        let after = after_seq.unwrap_or(0);
+        let limit_i = i64::try_from(limit).unwrap_or(i64::MAX);
+        let rows = if let Some(key) = topic_key {
+            sqlx::query(
+                "SELECT event_id, topic_name, topic_key, seq, actor_json, payload_json, created_at
+                 FROM events
+                 WHERE topic_name = ? AND topic_key = ? AND seq > ?
+                 ORDER BY seq ASC
+                 LIMIT ?",
+            )
+            .bind(topic_name)
+            .bind(key)
+            .bind(after)
+            .bind(limit_i)
+            .fetch_all(&self.pool)
+            .await
+        } else {
+            sqlx::query(
+                "SELECT event_id, topic_name, topic_key, seq, actor_json, payload_json, created_at
+                 FROM events
+                 WHERE topic_name = ? AND seq > ?
+                 ORDER BY seq ASC
+                 LIMIT ?",
+            )
+            .bind(topic_name)
+            .bind(after)
+            .bind(limit_i)
+            .fetch_all(&self.pool)
+            .await
+        }
+        .map_err(map_sqlx)?;
+
+        rows.iter()
+            .map(row_to_event)
+            .map(|event| event.and_then(|event| open_stored_event(&self.crypto, event)))
+            .collect()
+    }
+
+    async fn fetch_list_recent(&self, limit: usize) -> Result<Vec<Event>> {
+        if limit == 0 {
+            return Ok(Vec::new());
+        }
+        let limit_i = i64::try_from(limit).unwrap_or(i64::MAX);
+        let rows = sqlx::query(
+            "SELECT event_id, topic_name, topic_key, seq, actor_json, payload_json, created_at
+             FROM events
+             ORDER BY created_at DESC, seq DESC
+             LIMIT ?",
+        )
+        .bind(limit_i)
+        .fetch_all(&self.pool)
+        .await
+        .map_err(map_sqlx)?;
+
+        rows.iter()
+            .map(row_to_event)
+            .map(|event| event.and_then(|event| open_stored_event(&self.crypto, event)))
+            .collect()
+    }
 }
 
 fn row_to_event(row: &sqlx::sqlite::SqliteRow) -> Result<Event> {
@@ -388,6 +458,21 @@ impl StoragePort for SqliteStoragePort {
             return Ok(Some(open_stored_event(&self.crypto, ev.clone())?));
         }
         self.fetch_event_by_id(event_id).await
+    }
+
+    async fn list_by_topic(
+        &self,
+        topic_name: &str,
+        topic_key: Option<&str>,
+        after_seq: Option<i64>,
+        limit: usize,
+    ) -> Result<Vec<Event>> {
+        self.fetch_list_by_topic(topic_name, topic_key, after_seq, limit)
+            .await
+    }
+
+    async fn list_recent(&self, limit: usize) -> Result<Vec<Event>> {
+        self.fetch_list_recent(limit).await
     }
 
     async fn load_checkpoint(

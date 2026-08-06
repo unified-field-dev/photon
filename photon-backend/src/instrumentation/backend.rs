@@ -85,6 +85,22 @@ impl PhotonBackend for InstrumentedPhotonBackend {
         self.inner.get_event(event_id).await
     }
 
+    async fn list_by_topic(
+        &self,
+        topic_name: &str,
+        topic_key: Option<&str>,
+        after_seq: Option<i64>,
+        limit: usize,
+    ) -> Result<Vec<Event>> {
+        self.inner
+            .list_by_topic(topic_name, topic_key, after_seq, limit)
+            .await
+    }
+
+    async fn list_recent(&self, limit: usize) -> Result<Vec<Event>> {
+        self.inner.list_recent(limit).await
+    }
+
     fn registry(&self) -> &TopicRegistry {
         self.inner.registry()
     }

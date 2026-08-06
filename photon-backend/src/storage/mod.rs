@@ -11,12 +11,14 @@
 //! | `subscribe` | Stream events; optional replay after `after_seq` |
 //! | `get_checkpoint_seq` / `set_checkpoint` | Durable subscription cursors |
 //! | `get_event` | Optional point lookup (`mem` / `sqlite`; brokers set `supports_get_event: false`) |
+//! | `list_by_topic` / `list_recent` | Optional ops browse (`mem` / `sqlite`; brokers set `supports_list_events: false`) |
 //!
 //! ## Capabilities
 //!
 //! | Field | `mem` / `sqlite` | Brokers |
 //! |-------|------------------|---------|
 //! | `supports_get_event` | `true` | `false` |
+//! | `supports_list_events` | `true` | `false` |
 //! | `max_replay_window` | unbounded / file-backed | ~15 min broker retention |
 //!
 //! See also: [`crate::checkpoint`], [`crate::retention`], [`crate::backend`].

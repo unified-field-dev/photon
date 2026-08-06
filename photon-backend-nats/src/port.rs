@@ -183,6 +183,20 @@ impl StoragePort for NatsStoragePort {
         Ok(None)
     }
 
+    async fn list_by_topic(
+        &self,
+        _topic_name: &str,
+        _topic_key: Option<&str>,
+        _after_seq: Option<i64>,
+        _limit: usize,
+    ) -> Result<Vec<Event>> {
+        Ok(Vec::new())
+    }
+
+    async fn list_recent(&self, _limit: usize) -> Result<Vec<Event>> {
+        Ok(Vec::new())
+    }
+
     async fn load_checkpoint(
         &self,
         subscription_name: &str,
