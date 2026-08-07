@@ -276,7 +276,7 @@ Builder fields and env fallbacks: [`NatsStoragePortBuilder` rustdoc](https://doc
 
 ## Verify
 
-Prefer AWS when local cargo is unavailable: `$UF_LAB_ROOT/photon/scripts/run-remote-check.sh`.
+Prefer AWS when local cargo is unavailable (remote check on an EC2 smoke host).
 
 ```bash
 export PHOTON_TRANSPORT_KEY=cGhvdG9uLWRldi10cmFuc3BvcnQta2V5LTMyYnl0ZXM=

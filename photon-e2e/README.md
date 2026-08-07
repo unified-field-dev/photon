@@ -29,7 +29,7 @@ Performance budgets belong in [`photon-bench`](../photon-bench/README.md).
 | Trigger | Scope | Command |
 |---------|-------|---------|
 | Push / PR | Full matrix — mem (18 incl. topology/telemetry) + sqlite + brokers | see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) `e2e` job |
-| AWS (authoritative for dev laptop) | All gates without local `cargo` | `$UF_LAB_ROOT/photon/scripts/run-all-e2e-aws.sh` |
+| AWS (authoritative for dev laptop) | All gates without local `cargo` | Operator AWS campaign (sqlite + broker fleets) |
 
 CI sets broker env vars from service containers and the Fluvio lab script (`PHOTON_NATS_URL`, `PHOTON_KAFKA_*`, `PHOTON_FLUVIO_*`).
 
@@ -59,18 +59,7 @@ Backend integration in CI: `subscribe_executor`, `retention_reclaim`, `handler_f
 
 ## Run (AWS — do not run `cargo` on resource-constrained dev laptops)
 
-```bash
-# SQLite + mem gates (auto-provisions t3.medium)
-$UF_LAB_ROOT/photon/infra/aws/sqlite-smoke/ (see scripts/)   # after provision.sh + bootstrap.sh
-
-# All backend e2e gates
-$UF_LAB_ROOT/photon/scripts/run-all-e2e-aws.sh
-
-# Per-backend (see each README)
-$UF_LAB_ROOT/photon/infra/aws/broker-fleet/scripts/run-e2e-validation-aws.sh
-$UF_LAB_ROOT/photon/infra/aws/kafka-smoke/
-$UF_LAB_ROOT/photon/infra/aws/fluvio-smoke/
-```
+Authoritative e2e for constrained laptops runs on AWS: SQLite/mem smoke, then broker fleets (NATS, Kafka, Fluvio). Operator scripts provision EC2, rsync the tree, and run the same `photon-e2e` gates CI uses. See [docs/VERIFICATION.md](../docs/VERIFICATION.md).
 
 Local `cargo test` (brokers need live services):
 

@@ -21,10 +21,10 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use futures::stream::Stream;
+use photon::storage::StorageCapabilities;
 use photon::{
     topic, Event, InProcStoragePort, Photon, PhotonError, Result, StoragePort, TransportCrypto,
 };
-use photon::storage::StorageCapabilities;
 use serde_json::Value;
 
 /// Decorator over any [`StoragePort`] adding topic-name validation and append auditing.

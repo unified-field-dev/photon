@@ -9,4 +9,4 @@ Teach the brokered path once with NATS examples (`nats_worker` / `nats_publisher
 
 Configuration: [`FluvioStoragePortBuilder`](https://docs.rs/photon-backend-fluvio/latest/photon_backend_fluvio/struct.FluvioStoragePortBuilder.html) (options + example). Index: [docs.rs `photon::config`](https://docs.rs/uf-photon/latest/photon/config/#storage-adapter-builders).
 
-Fleet runbook: `$UF_LAB_ROOT/photon/infra/aws/fluvio-fleet/README.md`.
+Fluvio fleet validation runs on AWS (operator campaign).

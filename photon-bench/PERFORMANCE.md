@@ -1,6 +1,6 @@
 # Photon performance
 
-Measured on AWS (`c6i.large` in-VPC primary row for fleet ingress). Photon is a realtime/event bus runtime with pluggable backends (in-process, SQLite, NATS, Kafka, Fluvio, and related topologies). Full PFH ladders live in the private `uf-live-cloud-lab` photon performance study.
+Measured on AWS (`c6i.large` in-VPC primary row for fleet ingress). Photon is a realtime/event bus runtime with pluggable backends (in-process, SQLite, NATS, Kafka, Fluvio, and related topologies). Full PFH ladders come from AWS campaign runs.
 
 ## Capacity shape
 

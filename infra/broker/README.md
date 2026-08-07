@@ -76,27 +76,4 @@ cargo test -p photon-e2e --features fluvio -- --ignored
 cargo test -p photon-backend-fluvio --test fluvio_contract -- --ignored --test-threads=1
 ```
 
-AWS smoke gate (t3.medium): [`infra/aws/fluvio-smoke/`](../aws/fluvio-smoke/README.md).
-
-## AWS multi-EC2 (authoritative fleet)
-
-Local compose is for **smoke**. Authoritative PF*/PB5 runs use separate EC2 NATS hosts; PB4 ratio is informational:
-
-```bash
-cd infra/aws/broker-fleet
-export AWS_KEY_NAME=your-key-name
-export SSH_KEY_PATH=~/.ssh/your-key-name.pem
-./provision.sh          # or reuse instances.env after partial provision
-./scripts/open-bench-ingress.sh   # only if bench runs from laptop over public IPs
-./deploy-brokers.sh
-./deploy-bench.sh       # dedicated bench EC2; or rsync + bootstrap on broker-1
-```
-
-Run validation **in-VPC** (private IPs) from bench or broker host:
-
-```bash
-export PHOTON_AWS_USE_PUBLIC_IPS=0
-./scripts/run-in-vpc-validation.sh
-```
-
-See [`infra/aws/broker-fleet/README.md`](../aws/broker-fleet/README.md).
+AWS smoke gate (t3.medium) and multi-EC2 fleet validation run on AWS (operator campaign). Local compose is for smoke only. Authoritative PF*/PB5 runs use separate EC2 NATS hosts; PB4 ratio is informational. Run fleet validation in-VPC (private IPs) from the bench or broker host.

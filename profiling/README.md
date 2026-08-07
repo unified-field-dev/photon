@@ -10,7 +10,7 @@ Authoritative NATS fleet numbers: in-VPC runs on `aws-c6i-large` per [`photon-be
 
 ## Criterion microbenches
 
-CPU-path Criterion benches use experiment IDs with the **`criterion-*` / `BM-CRIT-*`** prefix (see [`EXPERIMENTS.md`](../photon-bench/EXPERIMENTS.md#criterion-microbenches-bm-crit-)). Raw Criterion HTML/JSON stays under `target/criterion/` (or your `CARGO_TARGET_DIR`). Decision-grade summaries are exported to this tree as `criterion-*-aws.json` / `mem-profile-*-aws.md` via `infra/aws/sqlite-smoke/scripts/run-remote-criterion.sh`. Summarized in [`PERFORMANCE_STUDY.md` §10](../photon-bench/PERFORMANCE_STUDY.md#10-microbenchmarks--hot-path-baselines-2026-07-12). Use workspace `profile.profiling` (`debug = 1`) when collecting samples for flamegraphs.
+CPU-path Criterion benches use experiment IDs with the **`criterion-*` / `BM-CRIT-*`** prefix (see [`EXPERIMENTS.md`](../photon-bench/EXPERIMENTS.md#criterion-microbenches-bm-crit-)). Raw Criterion HTML/JSON stays under `target/criterion/` (or your `CARGO_TARGET_DIR`). Decision-grade summaries are exported to this tree as `criterion-*-aws.json` / `mem-profile-*-aws.md` from AWS remote Criterion runs. Summarized in [`PERFORMANCE_STUDY.md` §10](../photon-bench/PERFORMANCE_STUDY.md#10-microbenchmarks--hot-path-baselines-2026-07-12). Use workspace `profile.profiling` (`debug = 1`) when collecting samples for flamegraphs.
 
 ## Archival
 

@@ -404,7 +404,9 @@ mod tests {
         let recent = port.list_recent(2).await.expect("list_recent");
         assert_eq!(recent.len(), 2);
         assert!(recent[0].created_at >= recent[1].created_at);
-        assert!(recent.iter().any(|e| e.event_id == other.event_id || e.topic_name == topic));
+        assert!(recent
+            .iter()
+            .any(|e| e.event_id == other.event_id || e.topic_name == topic));
 
         let empty = port
             .list_by_topic(topic, None, None, 0)

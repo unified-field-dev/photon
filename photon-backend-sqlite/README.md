@@ -21,8 +21,4 @@ Photon::builder().storage_port(Arc::new(port)).auto_registry().build()?;
 
 ## Validation
 
-Run on AWS only (see `$UF_LAB_ROOT/photon/infra/aws/sqlite-smoke/README.md`):
-
-```bash
-$UF_LAB_ROOT/photon/infra/aws/sqlite-smoke/
-```
+Run on AWS only (SQLite smoke host / operator campaign). Do not treat laptop `cargo test` as the gate.

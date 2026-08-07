@@ -9,4 +9,4 @@ Teach the brokered path once with NATS examples (`nats_worker` / `nats_publisher
 
 Configuration: [`KafkaStoragePortBuilder`](https://docs.rs/photon-backend-kafka/latest/photon_backend_kafka/struct.KafkaStoragePortBuilder.html) (options + example). Index: [docs.rs `photon::config`](https://docs.rs/uf-photon/latest/photon/config/#storage-adapter-builders).
 
-Fleet runbook: `$UF_LAB_ROOT/photon/infra/aws/kafka-fleet/README.md`.
+Kafka fleet validation runs on AWS (operator campaign).

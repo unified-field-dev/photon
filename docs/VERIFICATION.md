@@ -2,15 +2,9 @@
 
 Re-run after doc changes. See [CONTRIBUTING.md](CONTRIBUTING.md#documentation).
 
-**Local laptop `cargo` is not the verification path** when the toolchain is broken or incomplete. Prefer the AWS SQLite smoke host (see [`infra/aws/sqlite-smoke/README.md`](../infra/aws/sqlite-smoke/README.md)):
+**Local laptop `cargo` is not the verification path** when the toolchain is broken or incomplete. Prefer an AWS SQLite smoke host: provision + bootstrap an EC2 instance, rsync this repo, then run remote check / CI-subset / full e2e smoke there.
 
-```bash
-# After provision.sh + bootstrap.sh (scripts live under ~/aws/photon-upstream/):
-export INSTANCES_ENV=~/aws/photon-upstream/sqlite-smoke/instances.env
-~/aws/photon-upstream/sqlite-smoke/run-remote-check.sh
-```
-
-That rsyncs the repo to EC2 and runs `cargo check`, full-workspace Clippy (`--all-targets --all-features -- -D warnings`), rustdoc (`RUSTDOCFLAGS=-D warnings`), and `photon-backend` tests. Broader CI subset (deny, e2e mem/sqlite, bench, examples, doctests): `~/aws/photon-upstream/sqlite-smoke/run-remote-ci.sh`. Full E2E smoke: `~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh`.
+That path runs `cargo check`, full-workspace Clippy (`--all-targets --all-features -- -D warnings`), rustdoc (`RUSTDOCFLAGS=-D warnings`), and `photon-backend` tests. Broader CI subset covers deny, e2e mem/sqlite, bench, examples, and doctests. Full E2E smoke exercises the adapter matrix on the same host class.
 
 ## Commands
 

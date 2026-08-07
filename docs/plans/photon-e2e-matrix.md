@@ -4,30 +4,20 @@ Embedded SQLite storage adapter, full e2e scenario coverage, topology/telemetry 
 
 ## Hard constraint
 
-**The dev laptop must never run `cargo build` / `cargo test`.** All validation runs on AWS EC2 via `infra/aws/*/scripts/`.
+**The dev laptop must never run `cargo build` / `cargo test`.** All validation runs on AWS EC2 (operator campaign).
 
 ## Phases
 
 1. **`photon-backend-sqlite`** — write-through SQLite + in-memory broadcast fanout
 2. **Matrix wiring** — `StorageAdapter::Sqlite` through testkit, photon-e2e, photon-bench
 3. **E2e scenarios** — 13 sqlite scenarios + topology/telemetry smokes promoted from `#[ignore]`
-4. **`infra/aws/sqlite-smoke`** — t3.medium provision/bootstrap/remote smoke
-5. **`infra/aws/scripts/~/aws/photon-upstream/scripts/run-all-e2e-aws.sh`** — orchestrate sqlite + kafka + fluvio + nats gates
+4. **AWS SQLite smoke** — t3.medium provision/bootstrap/remote smoke
+5. **AWS orchestration** — sqlite + kafka + fluvio + nats gates on EC2 (operator campaign)
 6. **Docs** — STORAGE-ADAPTERS-DESIGN, configuration, ROADMAP, photon-e2e README
 
 ## AWS validation
 
-```bash
-cd infra/aws/sqlite-smoke
-export AWS_KEY_NAME=your-key
-export SSH_KEY_PATH=~/.ssh/your-key.pem
-chmod +x provision.sh bootstrap.sh scripts/*.sh
-./provision.sh && ./bootstrap.sh && ~/aws/photon-upstream/sqlite-smoke/run-remote-smoke.sh
-./scripts/teardown.sh
-
-# All backends (sqlite auto-provisions; others need instances.env)
-~/aws/photon-upstream/scripts/run-all-e2e-aws.sh
-```
+Provision and bootstrap an EC2 SQLite smoke host, rsync this repo, run remote smoke, then tear down. For all backends, run the operator all-gates campaign (sqlite auto-provisions; broker fleets need live `instances.env`). Do not run `cargo build` / `cargo test` on the constrained laptop.
 
 ## Out of scope (v1)
 
