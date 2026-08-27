@@ -1,6 +1,6 @@
 [package]
 name = "uf-photon-core"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "Photon core types and identity port"
 license.workspace = true

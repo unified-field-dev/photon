@@ -1,6 +1,6 @@
 [package]
 name = "photon-runtime"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "Photon runtime builder and process-wide configuration"
 license.workspace = true

@@ -1,6 +1,6 @@
 [package]
 name = "uf-photon"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "Pub/sub event pipeline (public crate) — composable storage adapters"
 license.workspace = true
