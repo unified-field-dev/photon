@@ -2,7 +2,7 @@
 name = "uf-photon"
 version = "0.1.4"
 edition = "2021"
-description = "Pub/sub event pipeline (public crate) — composable storage adapters"
+description = "Typed Rust pub/sub runtime with durable subscriptions, replay, checkpoints, keyed topics, and pluggable storage."
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
