@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use chrono::Utc;
+use fluvio::metadata::partition::PartitionSpec;
 use futures::stream::Stream;
 use photon_backend::models::Event;
 use photon_backend::{
@@ -211,5 +212,60 @@ impl StoragePort for FluvioStoragePort {
         self.checkpoint_store
             .commit(subscription_name, topic_name, topic_key, last_seq)
             .await
+    }
+
+    async fn head_seq(&self, topic_name: &str, topic_key: Option<&str>) -> Result<Option<i64>> {
+        if self.config.replay_cursor == ReplayCursor::TailOnly {
+            return Ok(None);
+        }
+
+        if !self.config.is_sharded() {
+            let fluvio_topic = fluvio_topic_for(&self.config, 0, topic_name);
+            return self.shard_head_seq(&fluvio_topic).await;
+        }
+
+        if let Some(key) = topic_key {
+            let shard = pick_shard(key, self.config.topic_shards);
+            let fluvio_topic = fluvio_topic_for(&self.config, shard, topic_name);
+            let local = self.shard_head_seq(&fluvio_topic).await?;
+            return Ok(
+                local.map(|seq| composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0)))
+            );
+        }
+
+        let mut max_seq: Option<i64> = None;
+        for shard in 0..self.config.topic_shards {
+            let fluvio_topic = fluvio_topic_for(&self.config, shard, topic_name);
+            if let Some(local) = self.shard_head_seq(&fluvio_topic).await? {
+                let composite = composite_seq(shard, u64::try_from(local.max(0)).unwrap_or(0));
+                max_seq = Some(max_seq.map_or(composite, |m: i64| m.max(composite)));
+            }
+        }
+        Ok(max_seq)
+    }
+}
+
+impl FluvioStoragePort {
+    /// Highest assigned offset for one single-partition Fluvio topic, read from the SC's
+    /// partition metadata (`PartitionStatus.leader.hw`), or `None` when the topic has never
+    /// been created (no events published yet).
+    ///
+    /// `hw` is reported to the SC by the SPU on a periodic heartbeat, not synchronously with
+    /// each produce ack — a read immediately after `append` can lag the true head by roughly
+    /// a second. Fine for admin/health introspection; do not use this for read-your-writes.
+    async fn shard_head_seq(&self, fluvio_topic: &str) -> Result<Option<i64>> {
+        let admin = self.client.admin().await;
+        let partition_name = format!("{fluvio_topic}-0");
+        let partitions = admin
+            .list::<PartitionSpec, String>(Vec::new())
+            .await
+            .map_err(|e| {
+                PhotonError::caused(format!("fluvio head_seq list partitions {fluvio_topic}"), e)
+            })?;
+        let hw = partitions
+            .iter()
+            .find(|p| p.name == partition_name)
+            .map(|p| p.status.leader.hw);
+        Ok(hw.filter(|hw| *hw > 0))
     }
 }
