@@ -58,6 +58,8 @@ async fn ensure_one_stream(
             max_age: retention,
             storage: StorageType::File,
             num_replicas,
+            // Required for `Stream::direct_get_last_for_subject` (head_seq introspection).
+            allow_direct: true,
             ..Default::default()
         })
         .await

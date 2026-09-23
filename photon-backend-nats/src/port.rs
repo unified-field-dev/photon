@@ -12,6 +12,8 @@ use photon_backend::{
 use serde_json::Value;
 use uuid::Uuid;
 
+use async_nats::jetstream::stream::DirectGetErrorKind;
+
 use crate::checkpoint::CheckpointStore;
 use crate::config::{NatsConfig, NatsStoragePortBuilder, ReplayCursor};
 use crate::connect::connect_nats;
@@ -19,7 +21,9 @@ use crate::consumer::subscribe_push;
 use crate::message::encode_event;
 use crate::publish::PublishPipeline;
 use crate::stream::ensure_streams;
-use crate::stream_shard::{composite_seq, photon_subject_for, pick_shard, publish_routing_key};
+use crate::stream_shard::{
+    composite_seq, photon_subject_for, pick_shard, publish_routing_key, stream_name_for,
+};
 
 /// Read NATS URL from the environment.
 ///
@@ -224,5 +228,52 @@ impl StoragePort for NatsStoragePort {
         self.checkpoint_store
             .commit(subscription_name, topic_name, topic_key, last_seq)
             .await
+    }
+
+    async fn head_seq(&self, topic_name: &str, topic_key: Option<&str>) -> Result<Option<i64>> {
+        if self.config.replay_cursor == ReplayCursor::TailOnly {
+            return Ok(None);
+        }
+
+        if !self.config.is_sharded() {
+            return self.shard_head_seq(0, topic_name).await;
+        }
+
+        if let Some(key) = topic_key {
+            let shard = pick_shard(key, self.config.stream_shards);
+            let local = self.shard_head_seq(shard, topic_name).await?;
+            return Ok(
+                local.map(|seq| composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0)))
+            );
+        }
+
+        let mut max_seq: Option<i64> = None;
+        for shard in 0..self.config.stream_shards {
+            if let Some(local) = self.shard_head_seq(shard, topic_name).await? {
+                let composite = composite_seq(shard, u64::try_from(local.max(0)).unwrap_or(0));
+                max_seq = Some(max_seq.map_or(composite, |m: i64| m.max(composite)));
+            }
+        }
+        Ok(max_seq)
+    }
+}
+
+impl NatsStoragePort {
+    /// Highest assigned stream sequence for one topic subject on one stream shard, or `None`
+    /// when nothing has been published to that subject yet.
+    async fn shard_head_seq(&self, shard: u32, topic_name: &str) -> Result<Option<i64>> {
+        let stream_name = stream_name_for(&self.config, shard);
+        let subject = photon_subject_for(shard, self.config.stream_shards, topic_name);
+        let stream = self.jetstream.get_stream(&stream_name).await.map_err(|e| {
+            PhotonError::caused(format!("nats head_seq get_stream {stream_name}"), e)
+        })?;
+        match stream.direct_get_last_for_subject(subject).await {
+            Ok(msg) => Ok(Some(i64::try_from(msg.sequence).unwrap_or(i64::MAX))),
+            Err(e) if e.kind() == DirectGetErrorKind::NotFound => Ok(None),
+            Err(e) => Err(PhotonError::caused(
+                format!("nats head_seq direct_get {stream_name}"),
+                e,
+            )),
+        }
     }
 }
