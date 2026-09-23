@@ -109,22 +109,28 @@ async fn collect_checkpoints(
                 let last_seq = photon
                     .get_checkpoint_seq(group_id, handler.topic_name, Some(&shard_key))
                     .await?;
+                let head_seq = photon
+                    .head_seq(handler.topic_name, Some(&shard_key))
+                    .await?;
                 out.push(AdminCheckpointSummary {
                     subscription_name: group_id.to_string(),
                     topic_name: handler.topic_name.to_string(),
                     topic_key: Some(shard_key),
                     last_seq,
+                    head_seq,
                 });
             }
         } else {
             let last_seq = photon
                 .get_checkpoint_seq(handler.subscription_name, handler.topic_name, None)
                 .await?;
+            let head_seq = photon.head_seq(handler.topic_name, None).await?;
             out.push(AdminCheckpointSummary {
                 subscription_name: handler.subscription_name.to_string(),
                 topic_name: handler.topic_name.to_string(),
                 topic_key: None,
                 last_seq,
+                head_seq,
             });
         }
     }

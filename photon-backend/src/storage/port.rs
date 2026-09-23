@@ -221,4 +221,15 @@ pub trait StoragePort: Send + Sync {
         let _ = (topic_name, topic_key);
         None
     }
+
+    /// Highest `seq` ever assigned in a topic partition (ops/health introspection).
+    ///
+    /// # Contract
+    ///
+    /// - Returns `None` when the partition has no events yet, or the adapter cannot report it.
+    /// - Default returns `None` (unsupported).
+    async fn head_seq(&self, topic_name: &str, topic_key: Option<&str>) -> Result<Option<i64>> {
+        let _ = (topic_name, topic_key);
+        Ok(None)
+    }
 }

@@ -335,6 +335,17 @@ impl Photon {
         .await
     }
 
+    /// Highest `seq` ever assigned in a topic partition (ops/health introspection).
+    ///
+    /// Returns `None` when the partition has no events yet, or the backend does not support it.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
+    pub async fn head_seq(&self, topic_name: &str, topic_key: Option<&str>) -> Result<Option<i64>> {
+        PhotonBackend::head_seq(self.backend.as_ref(), topic_name, topic_key).await
+    }
+
     /// Shared tailer / executor services.
     #[must_use]
     pub const fn runtime(&self) -> &PhotonRuntimeState {

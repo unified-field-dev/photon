@@ -40,6 +40,8 @@ pub struct AdminCheckpointSummary {
     pub topic_key: Option<String>,
     /// Last committed sequence, if a checkpoint exists.
     pub last_seq: Option<i64>,
+    /// Highest sequence assigned in this partition, if known.
+    pub head_seq: Option<i64>,
 }
 
 /// Storage adapter capabilities surfaced for admin UIs.

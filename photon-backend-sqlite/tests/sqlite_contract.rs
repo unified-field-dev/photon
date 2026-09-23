@@ -61,6 +61,24 @@ async fn sqlite_append_subscribe_checkpoint_roundtrip() {
 }
 
 #[tokio::test]
+async fn sqlite_head_seq_tracks_appended_events() {
+    let (port, _file) = open_temp_port().await;
+    let topic = format!("testkit.contract.{}", uuid::Uuid::new_v4());
+
+    let before = port.head_seq(&topic, None).await.expect("read head seq");
+    assert_eq!(before, None);
+
+    for _ in 0..3 {
+        port.append(&topic, None, serde_json::json!({}), serde_json::json!({}))
+            .await
+            .expect("append");
+    }
+
+    let after = port.head_seq(&topic, None).await.expect("read head seq");
+    assert_eq!(after, Some(3));
+}
+
+#[tokio::test]
 async fn sqlite_get_event_and_keyed_filter() {
     let (port, _file) = open_temp_port().await;
     let topic = format!("testkit.keyed.{}", uuid::Uuid::new_v4());

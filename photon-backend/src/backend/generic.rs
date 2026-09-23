@@ -173,4 +173,8 @@ impl PhotonBackend for GenericPhotonBackend {
             .commit_checkpoint(subscription_name, topic_name, topic_key, last_seq)
             .await
     }
+
+    async fn head_seq(&self, topic_name: &str, topic_key: Option<&str>) -> Result<Option<i64>> {
+        self.port.head_seq(topic_name, topic_key).await
+    }
 }

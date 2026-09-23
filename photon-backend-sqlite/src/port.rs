@@ -521,6 +521,16 @@ impl StoragePort for SqliteStoragePort {
         let key = partition_key(topic_name, topic_key);
         self.delivery_pins.get(&key).map(|v| *v)
     }
+
+    async fn head_seq(&self, topic_name: &str, topic_key: Option<&str>) -> Result<Option<i64>> {
+        let pk = partition_key(topic_name, topic_key);
+        let row = sqlx::query("SELECT next_seq FROM seq_counters WHERE partition_key = ?")
+            .bind(&pk)
+            .fetch_optional(&self.pool)
+            .await
+            .map_err(map_sqlx)?;
+        Ok(row.map(|r| r.get::<i64, _>(0)))
+    }
 }
 
 #[cfg(test)]

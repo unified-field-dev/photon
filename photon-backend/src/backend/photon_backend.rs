@@ -128,4 +128,11 @@ pub trait PhotonBackend: Send + Sync {
         topic_key: Option<&str>,
         last_seq: i64,
     ) -> Result<()>;
+
+    /// Highest `seq` ever assigned in a topic partition (ops/health introspection).
+    ///
+    /// Default returns `None` when the adapter does not support it.
+    async fn head_seq(&self, _topic_name: &str, _topic_key: Option<&str>) -> Result<Option<i64>> {
+        Ok(None)
+    }
 }

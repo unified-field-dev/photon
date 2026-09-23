@@ -325,6 +325,11 @@ impl StoragePort for InProcStoragePort {
         let key = partition_key(topic_name, topic_key);
         self.delivery_pins.get(&key).map(|v| *v)
     }
+
+    async fn head_seq(&self, topic_name: &str, topic_key: Option<&str>) -> Result<Option<i64>> {
+        let key = partition_key(topic_name, topic_key);
+        Ok(self.seq_counters.get(&key).map(|v| *v))
+    }
 }
 
 #[cfg(test)]
