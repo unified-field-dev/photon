@@ -10,6 +10,7 @@ use photon_backend::models::Event;
 use photon_backend::{
     seal_event_for_storage, PhotonError, Result, StorageCapabilities, StoragePort,
 };
+use rskafka::client::partition::{OffsetAt, UnknownTopicHandling};
 use serde_json::Value;
 use uuid::Uuid;
 
@@ -211,5 +212,61 @@ impl StoragePort for KafkaStoragePort {
         self.checkpoint_store
             .commit(subscription_name, topic_name, topic_key, last_seq)
             .await
+    }
+
+    async fn head_seq(&self, topic_name: &str, topic_key: Option<&str>) -> Result<Option<i64>> {
+        if self.config.replay_cursor == ReplayCursor::TailOnly {
+            return Ok(None);
+        }
+
+        if !self.config.is_sharded() {
+            let kafka_topic = kafka_topic_for(&self.config, 0, topic_name);
+            return self.shard_head_seq(&kafka_topic).await;
+        }
+
+        if let Some(key) = topic_key {
+            let shard = pick_shard(key, self.config.topic_shards);
+            let kafka_topic = kafka_topic_for(&self.config, shard, topic_name);
+            let local = self.shard_head_seq(&kafka_topic).await?;
+            return Ok(
+                local.map(|seq| composite_seq(shard, u64::try_from(seq.max(0)).unwrap_or(0)))
+            );
+        }
+
+        let mut max_seq: Option<i64> = None;
+        for shard in 0..self.config.topic_shards {
+            let kafka_topic = kafka_topic_for(&self.config, shard, topic_name);
+            if let Some(local) = self.shard_head_seq(&kafka_topic).await? {
+                let composite = composite_seq(shard, u64::try_from(local.max(0)).unwrap_or(0));
+                max_seq = Some(max_seq.map_or(composite, |m: i64| m.max(composite)));
+            }
+        }
+        Ok(max_seq)
+    }
+}
+
+impl KafkaStoragePort {
+    /// Highest assigned offset for one physical Kafka topic partition, or `None` when the
+    /// topic has never been created (no events published yet).
+    async fn shard_head_seq(&self, kafka_topic: &str) -> Result<Option<i64>> {
+        let partition_client = match self
+            .client
+            .partition_client(kafka_topic.to_string(), 0, UnknownTopicHandling::Error)
+            .await
+        {
+            Ok(pc) => pc,
+            Err(e) if e.to_string().contains("UnknownTopicOrPartition") => return Ok(None),
+            Err(e) => {
+                return Err(PhotonError::caused(
+                    format!("kafka head_seq partition client {kafka_topic}"),
+                    e,
+                ))
+            }
+        };
+        let high_watermark = partition_client
+            .get_offset(OffsetAt::Latest)
+            .await
+            .map_err(|e| PhotonError::caused(format!("kafka head_seq offset {kafka_topic}"), e))?;
+        Ok((high_watermark > 0).then_some(high_watermark))
     }
 }

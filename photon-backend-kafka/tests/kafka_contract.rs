@@ -530,3 +530,79 @@ async fn kafka_sharded_unkeyed_fanin_subscribe() {
     let ids = seen.lock().await;
     assert!(ids.contains(&evt.event_id));
 }
+
+#[tokio::test]
+#[ignore = "requires PHOTON_KAFKA_BROKERS and live Kafka"]
+async fn kafka_head_seq_tracks_appended_events() {
+    if !kafka_available() {
+        return;
+    }
+
+    let port = KafkaStoragePort::builder()
+        .from_env_defaults()
+        .replay_cursor(ReplayCursor::StreamSeq)
+        .sync_ack(true)
+        .build()
+        .await
+        .expect("connect kafka");
+    let topic = format!("testkit.head_seq.{}", uuid::Uuid::new_v4());
+
+    let before = port.head_seq(&topic, None).await.expect("read head seq");
+    assert_eq!(before, None);
+
+    let published = port
+        .append(
+            &topic,
+            None,
+            serde_json::json!({"test": "actor"}),
+            serde_json::json!({"contract": true}),
+        )
+        .await
+        .expect("append");
+
+    let after = port.head_seq(&topic, None).await.expect("read head seq");
+    assert_eq!(after, Some(published.seq));
+}
+
+#[tokio::test]
+#[ignore = "requires PHOTON_KAFKA_BROKERS and live Kafka"]
+async fn kafka_head_seq_sharded_keyed_matches_composite_seq() {
+    if !kafka_available() {
+        return;
+    }
+
+    std::env::set_var("PHOTON_KAFKA_TOPIC_SHARDS", "4");
+    let port = KafkaStoragePort::builder()
+        .from_env_defaults()
+        .replay_cursor(ReplayCursor::StreamSeq)
+        .sync_ack(true)
+        .build()
+        .await
+        .expect("connect sharded kafka");
+    std::env::remove_var("PHOTON_KAFKA_TOPIC_SHARDS");
+
+    let topic = format!("testkit.head_seq.sharded.{}", uuid::Uuid::new_v4());
+    let partition_key = format!("partition-{}", uuid::Uuid::new_v4());
+
+    let published = port
+        .append(
+            &topic,
+            Some(&partition_key),
+            serde_json::json!({"test": "actor"}),
+            serde_json::json!({"sharded": true}),
+        )
+        .await
+        .expect("append");
+
+    let keyed = port
+        .head_seq(&topic, Some(&partition_key))
+        .await
+        .expect("read keyed head seq");
+    assert_eq!(keyed, Some(published.seq));
+
+    let unkeyed = port
+        .head_seq(&topic, None)
+        .await
+        .expect("read unkeyed aggregate head seq");
+    assert_eq!(unkeyed, Some(published.seq));
+}
