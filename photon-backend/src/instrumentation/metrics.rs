@@ -1,4 +1,4 @@
-//! UC1 counter helpers for Photon self-telemetry.
+//! Spectra counter helpers for Photon self-telemetry.
 
 use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::OnceLock;

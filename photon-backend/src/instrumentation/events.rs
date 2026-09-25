@@ -1,4 +1,4 @@
-//! UC3 event field builders for Photon self-telemetry.
+//! Spectra event field builders for Photon self-telemetry.
 
 use chrono::{DateTime, Utc};
 use serde::Serialize;
@@ -104,7 +104,7 @@ pub fn ops_log_fields(
 
 use photon_telemetry::ops_log;
 
-/// Emit a `photon_ops_log` UC3 row via the installed [`photon_telemetry::OpsLog`].
+/// Emit a `photon_ops_log` Spectra event row via the installed [`photon_telemetry::OpsLog`].
 pub fn log_ops(
     component: &str,
     operation: &str,
