@@ -98,7 +98,6 @@ async fn ensure_topic_cached(
 }
 
 /// Open a consumer stream for a topic partition subscription.
-#[must_use]
 pub fn subscribe_stream(
     client: SharedClient,
     config: FluvioConfig,

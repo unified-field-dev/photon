@@ -132,7 +132,6 @@ fn normalize_event_seq(
 }
 
 /// Open a push consumer stream for a topic partition subscription.
-#[must_use]
 pub fn subscribe_push(
     jetstream: async_nats::jetstream::Context,
     config: NatsConfig,

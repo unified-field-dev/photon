@@ -211,7 +211,6 @@ impl Photon {
     /// # Ok(())
     /// # }
     /// ```
-    #[must_use]
     pub fn subscribe(
         &self,
         topic_name: &str,
@@ -227,7 +226,6 @@ impl Photon {
     }
 
     /// Subscribe to assigned virtual shards for a consumer group (multiplexed stream).
-    #[must_use]
     pub fn subscribe_consumer_group(
         &self,
         topic_name: &str,
