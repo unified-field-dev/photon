@@ -10,6 +10,9 @@ ignore = [
     { id = "RUSTSEC-2024-0384", reason = "unmaintained instant; transitive via broker SDKs" },
     { id = "RUSTSEC-2024-0436", reason = "unmaintained paste; transitive via broker SDKs" },
     { id = "RUSTSEC-2025-0134", reason = "unmaintained rustls-pemfile; transitive via broker SDKs" },
+    # 2026-10-14: fluvio 0.50.1 (latest) pulls serde_yaml 0.9.34+deprecated, which pulls unsafe-libyaml.
+    # No patched release; revisit when Fluvio moves off serde_yaml. See BACKLOG ammonia_rustsec_2021_0157_0158_01.
+    { id = "RUSTSEC-2024-0449", reason = "unmaintained unsafe-libyaml; transitive via fluvio -> serde_yaml" },
 ]
 
 [licenses]
