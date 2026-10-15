@@ -1,9 +1,0 @@
-tokio_spawn_empty_join_all
-                        time:   [32.661 µs 32.858 µs 33.074 µs]
-Found 1 outliers among 50 measurements (2.00%)
-  1 (2.00%) high mild
-
-tokio_joinset_empty     time:   [49.313 µs 49.370 µs 49.436 µs]
-Found 1 outliers among 50 measurements (2.00%)
-  1 (2.00%) high severe
-
