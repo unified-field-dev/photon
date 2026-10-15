@@ -1,6 +1,7 @@
 /target
 /target-*/
-photon-bench/reports/*.json
+/photon-bench/reports/*
+!/photon-bench/reports/.gitkeep
 profiling/photon-bench/reports-regression/
 profiling/photon-bench/reports-local/
 
