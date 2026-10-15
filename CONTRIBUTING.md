@@ -74,7 +74,7 @@ Use **cargo-deny** (`deny.toml` + CI `deny` job) for advisories/licenses. A sepa
 
 ## Performance targets (mem tier)
 
-Methodology and measured study numbers live in [`photon-bench/PERFORMANCE_STUDY.md`](photon-bench/PERFORMANCE_STUDY.md); decision-grade JSON is kept in the lab repo (uf-live-cloud-lab) under `photon/reports/bench/`. `profiling/photon-bench/reports/` is gitignored local scratch. Do not copy snapshot tables into CONTRIBUTING or VERIFICATION.
+Methodology and measured study numbers live in [`photon-bench/PERFORMANCE_STUDY.md`](photon-bench/PERFORMANCE_STUDY.md); decision-grade AWS results aren't committed to this repo. `profiling/photon-bench/reports/` is gitignored local scratch. Do not copy snapshot tables into CONTRIBUTING or VERIFICATION.
 
 CI smoke gate: `bench-smoke` requires `bm-p0` JSON `"pass": true`. For local Criterion compare (baselines stay under `target/`, not committed):
 

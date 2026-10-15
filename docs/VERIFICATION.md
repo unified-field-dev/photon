@@ -66,7 +66,7 @@ PHOTON_BENCH_OFFERED_RATE=50 cargo run -p photon-bench -- run --experiment bm-pd
 cargo run -p photon-bench --features nats -- run --experiment bm-pd1 --storage nats --topology broker-cluster
 ```
 
-SQLite PD0 on a `t3.medium` is enough for local/harness checks. Authoritative NATS PD numbers come from the AWS 4-shard in-VPC campaign (`infra/aws/broker-fleet/scripts/run-pd-campaign-aws.sh` in `uf-live-cloud-lab`).
+SQLite PD0 on a `t3.medium` is enough for local/harness checks. Authoritative NATS PD numbers come from the AWS 4-shard in-VPC campaign, whose tooling is maintained separately and isn't part of this repo.
 
 ## Line coverage (CI artifact)
 

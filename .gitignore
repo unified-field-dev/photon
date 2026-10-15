@@ -8,5 +8,5 @@ profiling/photon-bench/reports-local/
 # Local Sentrux quality-gate config (dev artifact; not part of upstream)
 .sentrux/
 
-# Bench reports live in uf-live-cloud-lab/photon/reports/bench/
+# Local bench output; decision-grade results aren't kept in this repo
 /profiling/photon-bench/reports/

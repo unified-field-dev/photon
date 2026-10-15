@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Local PD harness smoke: encrypted checkpoint delivery on mem and sqlite.
-# AWS NATS 4-shard campaign: uf-live-cloud-lab/.../broker-fleet/scripts/run-pd-campaign-aws.sh
+# AWS NATS 4-shard campaign tooling is maintained separately and isn't part of this repo.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 REPO="$(cd "$ROOT/.." && pwd)"

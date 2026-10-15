@@ -2,7 +2,7 @@
 
 ## Active
 
-Bench runs write JSON to `profiling/photon-bench/reports/` (`matrix` runs write to `photon-bench/reports/` at the repo root). Both are gitignored local scratch. Decision-grade AWS fleet BM-P* JSON (`*-aws.json`, `aws-c6i-large` / `aws-t3-*` hardware labels) is kept in the lab repo (uf-live-cloud-lab) under `photon/reports/bench/`.
+Bench runs write JSON to `profiling/photon-bench/reports/` (`matrix` runs write to `photon-bench/reports/` at the repo root). Both are gitignored local scratch. Decision-grade AWS fleet BM-P* JSON (`*-aws.json`, `aws-c6i-large` / `aws-t3-*` hardware labels) isn't committed to this repo.
 
 Local smoke runs write to `profiling/photon-bench/reports-local/` (gitignored). Do not commit dev-wsl scratch output.
 
@@ -10,8 +10,8 @@ Authoritative NATS fleet numbers: in-VPC runs on `aws-c6i-large` per [`photon-be
 
 ## Criterion microbenches
 
-CPU-path Criterion benches use experiment IDs with the **`criterion-*` / `BM-CRIT-*`** prefix (see [`EXPERIMENTS.md`](../photon-bench/EXPERIMENTS.md#criterion-microbenches-bm-crit-)). Raw Criterion HTML/JSON stays under `target/criterion/` (or your `CARGO_TARGET_DIR`). Decision-grade summaries from AWS remote Criterion runs (`criterion-*-aws.json` / `mem-profile-*-aws.md`) are kept in the lab repo under `photon/reports/bench/`. Summarized in [`PERFORMANCE_STUDY.md` §10](../photon-bench/PERFORMANCE_STUDY.md#10-microbenchmarks--hot-path-baselines-2026-07-12). Use workspace `profile.profiling` (`debug = 1`) when collecting samples for flamegraphs.
+CPU-path Criterion benches use experiment IDs with the **`criterion-*` / `BM-CRIT-*`** prefix (see [`EXPERIMENTS.md`](../photon-bench/EXPERIMENTS.md#criterion-microbenches-bm-crit-)). Raw Criterion HTML/JSON stays under `target/criterion/` (or your `CARGO_TARGET_DIR`). Decision-grade summaries from AWS remote Criterion runs (`criterion-*-aws.json` / `mem-profile-*-aws.md`) aren't committed to this repo. Summarized in [`PERFORMANCE_STUDY.md` §10](../photon-bench/PERFORMANCE_STUDY.md#10-microbenchmarks--hot-path-baselines-2026-07-12). Use workspace `profile.profiling` (`debug = 1`) when collecting samples for flamegraphs.
 
 ## Archival
 
-Surreal-mem rows (`bm-*-surreal-mem-*`) are pre-adapter historical artifacts kept in the lab repo under `photon/reports/bench/`. They are not used by the current bench runner (`photon-bench/src/matrix.rs` accepts `mem|sqlite|nats|fluvio|kafka`).
+Surreal-mem rows (`bm-*-surreal-mem-*`) are pre-adapter historical artifacts and aren't committed to this repo. They are not used by the current bench runner (`photon-bench/src/matrix.rs` accepts `mem|sqlite|nats|fluvio|kafka`).
