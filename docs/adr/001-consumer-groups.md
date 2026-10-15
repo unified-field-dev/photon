@@ -53,4 +53,4 @@ We introduce two **delivery modes**, configured at `#[photon::topic]` (publish r
 | Shard routing, publish/subscribe | `photon-backend/src/shard_router.rs`, `publish_routing.rs`, `group_subscribe.rs` |
 | Coordinator + leases | `photon-backend/src/consumer_group/` |
 | Executor + macros | `photon-runtime/src/executor.rs`, `photon-macros/src/topic.rs`, `subscribe.rs` |
-| Verification | `photon-bench/EXPERIMENTS.md` (BM-PG0–PG2), `photon-e2e` `consumer_group_static_mem_embedded` |
+| Verification | BM-PG0–PG2 (`cargo run -p photon-bench -- experiments`), `photon-e2e` `consumer_group_static_mem_embedded` |

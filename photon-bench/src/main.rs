@@ -1,7 +1,7 @@
 #![recursion_limit = "512"]
 //! Synthetic Photon benchmarks (`BM-P*` / `BM-PL*`).
 //!
-//! Experiment registry and matrix campaign runner. See `EXPERIMENTS.md` in this crate.
+//! Experiment registry and matrix campaign runner. Run `photon-bench experiments` to list registered IDs.
 //!
 //! ## Entry points
 //!
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
                     meta.summary
                 );
             }
-            println!("Full matrix: photon-bench/EXPERIMENTS.md");
+            println!("Run one with: photon-bench run --experiment <ID>");
         }
         Command::Run {
             experiment,

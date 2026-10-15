@@ -26,7 +26,7 @@ pub fn resolve_experiment(
 ) -> Result<ExperimentPlan> {
     let normalized = id.to_ascii_lowercase();
     if meta_for(&normalized).is_none() {
-        bail!("unknown experiment {normalized}; see photon-bench/EXPERIMENTS.md");
+        bail!("unknown experiment {normalized}; run `photon-bench experiments` to list IDs");
     }
     specs::build_plan(&normalized, ops)
         .ok_or_else(|| anyhow::anyhow!("unknown experiment {normalized}"))

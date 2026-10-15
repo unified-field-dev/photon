@@ -16,7 +16,7 @@
 //! - [`NatsConfig`] / [`NatsStoragePortBuilder`] — connection and stream options
 //! - [`nats_url_from_env`] — resolve broker URL from environment
 //!
-//! Performance methodology: [`photon-bench/PERFORMANCE_STUDY.md`](../../photon-bench/PERFORMANCE_STUDY.md).
+//! Performance notes: [`photon-bench/PERFORMANCE.md`](../../photon-bench/PERFORMANCE.md).
 //!
 //! ## Topic mapping (NATS)
 //!

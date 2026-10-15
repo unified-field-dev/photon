@@ -16,7 +16,7 @@
 //! - [`FluvioConfig`] / [`FluvioStoragePortBuilder`] — connection and topic options
 //! - [`fluvio_endpoint_from_env`] — resolve SC endpoint from environment
 //!
-//! Performance methodology: [`photon-bench/PERFORMANCE_STUDY.md`](../../photon-bench/PERFORMANCE_STUDY.md).
+//! Performance notes: [`photon-bench/PERFORMANCE.md`](../../photon-bench/PERFORMANCE.md).
 //!
 //! ## Topic mapping (Fluvio)
 //!

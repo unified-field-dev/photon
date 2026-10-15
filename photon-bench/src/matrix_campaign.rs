@@ -1,4 +1,4 @@
-//! Campaign slice matrix row expansion (see `EXPERIMENTS.md`).
+//! Campaign slice matrix row expansion (IDs from `photon-bench experiments`).
 
 use photon_testkit::{MatrixSpec, StorageAdapter, TelemetryAdapter, Topology};
 

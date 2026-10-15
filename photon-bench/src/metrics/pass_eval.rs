@@ -1,4 +1,4 @@
-//! Pass/fail evaluators aligned with `EXPERIMENTS.md` criteria.
+//! Pass/fail evaluators for each registered experiment's criteria.
 
 use crate::metrics::latency::PublishSlope;
 use crate::metrics::load::LoadSummary;

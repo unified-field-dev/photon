@@ -4,8 +4,8 @@ Synthetic benchmarks and pre-registered experiment matrix for Photon pub/sub acr
 
 | Document | Role |
 |----------|------|
-| [`PERFORMANCE.md`](PERFORMANCE.md) | Methodology, research questions, threats to validity |
-| [`PERFORMANCE.md`](PERFORMANCE.md) | Registry — dimensions, IDs (including BM-CRIT-*), status, pass criteria, runner commands |
+| [`PERFORMANCE.md`](PERFORMANCE.md) | Capacity numbers and how to read them |
+| `cargo run -p photon-bench -- experiments` | Registry: experiment IDs, status, summary (source: `src/experiments/registry.rs`) |
 
 ## Workspace cargo profiles
 
@@ -21,7 +21,7 @@ cargo build -p photon-bench --profile profiling
 cargo bench -p photon-backend --features runtime
 ```
 
-Criterion microbenches (`BM-CRIT-*`) live in `photon-backend/benches/`; see [`EXPERIMENTS.md`](EXPERIMENTS.md#criterion-microbenches-bm-crit-).
+Criterion microbenches (`BM-CRIT-*`) live in `photon-backend/benches/`.
 
 ## Upstream repos
 

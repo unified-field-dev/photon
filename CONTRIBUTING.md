@@ -74,7 +74,7 @@ Use **cargo-deny** (`deny.toml` + CI `deny` job) for advisories/licenses. A sepa
 
 ## Performance targets (mem tier)
 
-Methodology and measured study numbers live in [`photon-bench/PERFORMANCE_STUDY.md`](photon-bench/PERFORMANCE_STUDY.md); decision-grade AWS results aren't committed to this repo. `profiling/photon-bench/reports/` is gitignored local scratch. Do not copy snapshot tables into CONTRIBUTING or VERIFICATION.
+Capacity numbers and how to read them live in [`photon-bench/PERFORMANCE.md`](photon-bench/PERFORMANCE.md); decision-grade AWS results aren't committed to this repo. `profiling/photon-bench/reports/` is gitignored local scratch. Do not copy snapshot tables into CONTRIBUTING or VERIFICATION.
 
 CI smoke gate: `bench-smoke` requires `bm-p0` JSON `"pass": true`. For local Criterion compare (baselines stay under `target/`, not committed):
 
@@ -83,7 +83,7 @@ CARGO_BUILD_JOBS=1 cargo bench -p photon-backend --features runtime -- --save-ba
 CARGO_BUILD_JOBS=1 cargo bench -p photon-backend --features runtime -- --baseline local
 ```
 
-See [`photon-bench/EXPERIMENTS.md`](photon-bench/EXPERIMENTS.md#criterion-microbenches-bm-crit-).
+Criterion microbenches use `BM-CRIT-*` IDs and live in `photon-backend/benches/`. List the registered `photon-bench` experiment IDs with `cargo run -p photon-bench -- experiments`.
 
 ## Coverage
 

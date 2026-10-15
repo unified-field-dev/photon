@@ -59,7 +59,7 @@ fn parse_telemetry(s: &str) -> Result<TelemetryAdapter> {
     }
 }
 
-/// Campaign slice experiment lists (see `EXPERIMENTS.md`).
+/// Campaign slice experiment lists (IDs from `photon-bench experiments`).
 pub fn slice_experiments(slice: &str) -> Result<Vec<&'static str>> {
     match slice {
         "photon-minimal" | "adapter-minimal" => Ok(vec!["bm-p0", "bm-p1", "bm-pg0", "bm-pg2"]),

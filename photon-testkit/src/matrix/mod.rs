@@ -1,4 +1,4 @@
-//! Benchmark/e2e dimension matrix (extends [`photon-bench/EXPERIMENTS.md`](../../photon-bench/EXPERIMENTS.md)).
+//! Benchmark/e2e dimension matrix (extends the `photon-bench` experiment registry; list IDs with `cargo run -p photon-bench -- experiments`).
 
 mod presets;
 

@@ -57,7 +57,7 @@ Photon is a Rust pub/sub runtime with typed topics and durable subscriptions. St
 
 ## Performance
 
-Publish throughput depends on your storage adapter and how many Photon embed hosts you run. The table below is a **2026-07-07** set of **representative fleet ingress snapshots** (AWS in-VPC, crypto off, zero subscribers) — useful for sizing Photon embeds on each adapter path, **not** a fair adapter leaderboard or vendor bake-off. Full methodology and threats to validity: [`PERFORMANCE_STUDY.md`](photon-bench/PERFORMANCE_STUDY.md).
+Publish throughput depends on your storage adapter and how many Photon embed hosts you run. The table below is a **2026-07-07** set of **representative fleet ingress snapshots** (AWS in-VPC, crypto off, zero subscribers) — useful for sizing Photon embeds on each adapter path, **not** a fair adapter leaderboard or vendor bake-off. How to read these numbers: [`PERFORMANCE.md`](photon-bench/PERFORMANCE.md).
 
 | Adapter | One embed host | Four embed hosts |
 |---------|----------------|------------------|
@@ -139,14 +139,14 @@ See [Getting started](https://docs.rs/uf-photon/latest/photon/#getting-started) 
 | [docs/macro-expansion.md](docs/macro-expansion.md) | What `#[topic]` / `#[subscribe]` generate |
 | `cargo doc -p uf-photon --features runtime,mem --open` | Full API reference |
 | [photon/README.md](photon/README.md) | Features, wiring checklist |
-| [photon-bench/PERFORMANCE_STUDY.md](photon-bench/PERFORMANCE_STUDY.md) | Performance methodology |
-| [photon-bench/EXPERIMENTS.md](photon-bench/EXPERIMENTS.md) | Benchmark registry |
+| [photon-bench/PERFORMANCE.md](photon-bench/PERFORMANCE.md) | Performance notes |
+| `cargo run -p photon-bench -- experiments` | Benchmark registry (experiment IDs) |
 | [uf-quark](https://crates.io/crates/uf-quark) / [Quark](https://github.com/unified-field-dev/quark) | Topic/handler inventory |
 | [.github/workflows/ci.yml](.github/workflows/ci.yml) | CI verify commands |
 
 ## FAQ
 
-**Is it production-ready?** v0.1.1 early release; `mem` and `sqlite` tiers are tested in CI; NATS / Fluvio / Kafka adapters have PFH fleet ingress numbers — see [PERFORMANCE_STUDY.md](photon-bench/PERFORMANCE_STUDY.md) and [EXPERIMENTS.md](photon-bench/EXPERIMENTS.md).
+**Is it production-ready?** v0.1.1 early release; `mem` and `sqlite` tiers are tested in CI; NATS / Fluvio / Kafka adapters have PFH fleet ingress numbers — see [PERFORMANCE.md](photon-bench/PERFORMANCE.md), and list experiment IDs with `cargo run -p photon-bench -- experiments`.
 
 **Do I need an external broker?** No for single-process — default `mem` is in-memory; `sqlite` adds durable embedded storage. Use `nats`, `fluvio`, or `kafka` for fleet scale.
 

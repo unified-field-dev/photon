@@ -13,7 +13,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// List registered experiment IDs (see `EXPERIMENTS.md`).
+    /// List registered experiment IDs with status and summary.
     Experiments,
     /// Run one experiment id against a matrix slice.
     Run {

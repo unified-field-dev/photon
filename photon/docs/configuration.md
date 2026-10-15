@@ -186,7 +186,7 @@ Fleet multi-node delivery uses broker-native fanout (`nats` / `fluvio` / `kafka`
 | `PHOTON_BENCH_OFFERED_RATE` | Offered publish rate for BM-PD2/PD3. Omit for an in-process sweep (`PHOTON_BENCH_OFFERED_RATE_SWEEP`, default `50,100,250,500,1000`). |
 | `PHOTON_BENCH_P6_P99_BUDGET_MS` | Fanout latency pass budget for BM-P6. Authoritative value from in-VPC run: **103** (rounded from p99 102.58 ms). |
 
-CLI reference: `photon-bench/EXPERIMENTS.md`, `photon-bench/src/cli.rs`.
+CLI reference: `cargo run -p photon-bench -- experiments` (experiment IDs), `photon-bench/src/cli.rs`.
 
 ---
 

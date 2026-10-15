@@ -16,7 +16,7 @@
 //! - [`KafkaConfig`] / [`KafkaStoragePortBuilder`] — connection and topic options
 //! - [`kafka_brokers_from_env`] — resolve broker list from environment
 //!
-//! Performance methodology: [`photon-bench/PERFORMANCE_STUDY.md`](../../photon-bench/PERFORMANCE_STUDY.md).
+//! Performance notes: [`photon-bench/PERFORMANCE.md`](../../photon-bench/PERFORMANCE.md).
 //!
 //! ## Topic mapping (Kafka)
 //!
