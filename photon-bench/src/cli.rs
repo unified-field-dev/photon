@@ -116,9 +116,4 @@ pub enum Command {
         #[arg(long)]
         cell_prefix: Option<String>,
     },
-    /// Sync `EXPERIMENTS.md` Results snippets from report JSON (best-effort).
-    FillResults {
-        #[arg(long, default_value = "photon-bench/reports")]
-        reports_dir: PathBuf,
-    },
 }

@@ -11,7 +11,6 @@
 
 mod cli;
 mod experiments;
-mod fill_results;
 mod harness;
 mod matrix;
 mod matrix_campaign;
@@ -136,7 +135,6 @@ async fn main() -> Result<()> {
                 cell_prefix.as_deref(),
             )?;
         }
-        Command::FillResults { reports_dir } => fill_results::fill_results(&reports_dir)?,
     }
     Ok(())
 }
