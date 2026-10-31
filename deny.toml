@@ -13,6 +13,12 @@ ignore = [
     # 2026-10-14: fluvio 0.50.1 (latest) pulls serde_yaml 0.9.34+deprecated, which pulls unsafe-libyaml.
     # No patched release; revisit when Fluvio moves off serde_yaml. See BACKLOG ammonia_rustsec_2021_0157_0158_01.
     { id = "RUSTSEC-2024-0449", reason = "unmaintained unsafe-libyaml; transitive via fluvio -> serde_yaml" },
+    # 2026-10-27: rskafka 0.6.0 and fluvio-compression 0.50.1 both pin `zstd = "0.13"`, which caps
+    # zstd-safe on the 7.x line too. No patched zstd (>=0.14.3) or zstd-safe (>=8.2.0) is reachable
+    # until one of those crates releases a version that loosens the pin.
+    { id = "RUSTSEC-2026-0391", reason = "zstd pinned to 0.13 by rskafka/fluvio-compression; no reachable patch" },
+    { id = "RUSTSEC-2026-0398", reason = "zstd-safe capped at 7.x by zstd 0.13's own pin; no reachable patch" },
+    { id = "RUSTSEC-2026-0403", reason = "zstd-safe capped at 7.x by zstd 0.13's own pin; no reachable patch" },
 ]
 
 [licenses]

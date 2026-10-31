@@ -1,4 +1,7 @@
 [advisories]
 # Transitive via broker SDKs; no fixed upgrade available upstream (matches the
 # same ignore already used in higgs/deny.toml elsewhere in the fleet).
-ignore = ["RUSTSEC-2023-0071"]
+# RUSTSEC-2026-0391/0398/0403: zstd pinned to 0.13 by rskafka 0.6.0 and
+# fluvio-compression 0.50.1 (both declare `zstd = "0.13"`), which caps zstd-safe
+# on 7.x too. See deny.toml for the matching ignore and the fuller reason.
+ignore = ["RUSTSEC-2023-0071", "RUSTSEC-2026-0391", "RUSTSEC-2026-0398", "RUSTSEC-2026-0403"]
