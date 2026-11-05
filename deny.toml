@@ -19,6 +19,9 @@ ignore = [
     { id = "RUSTSEC-2026-0391", reason = "zstd pinned to 0.13 by rskafka/fluvio-compression; no reachable patch" },
     { id = "RUSTSEC-2026-0398", reason = "zstd-safe capped at 7.x by zstd 0.13's own pin; no reachable patch" },
     { id = "RUSTSEC-2026-0403", reason = "zstd-safe capped at 7.x by zstd 0.13's own pin; no reachable patch" },
+    # 2026-11-05: pin-utils 0.1.0 archived upstream on 2026-10-01; only reachable via
+    # fluvio -> fluvio-future -> fluvio-wasm-timer. Revisit when fluvio drops fluvio-wasm-timer.
+    { id = "RUSTSEC-2026-0441", reason = "unmaintained pin-utils; transitive via fluvio -> fluvio-future -> fluvio-wasm-timer; no patched release" },
 ]
 
 [licenses]
